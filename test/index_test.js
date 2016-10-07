@@ -7,6 +7,7 @@ var compose = require("lodash.compose")
 var promise = compose(constant, Promise.resolve.bind(Promise))
 var resolve = Promise.resolve.bind(Promise)
 var toUpperCase = Function.call.bind(String.prototype.toUpperCase)
+var EXAMPLE_OPTS = {deleted: true}
 
 function HeavenOnTest(model) { Heaven.call(this, model) }
 
@@ -114,8 +115,8 @@ describe("Heaven", function() {
       describe("given an id", function() {
         it("must call _read", function() {
           var heaven = create()
-          heaven[method](42)
-          heaven._read.firstCall.args.must.eql([42])
+          heaven[method](42, EXAMPLE_OPTS)
+          heaven._read.firstCall.args.must.eql([42, EXAMPLE_OPTS])
         })
 
         it("must resolve with a model", function*() {
@@ -147,8 +148,8 @@ describe("Heaven", function() {
         it("must call _read", function() {
           var model = new Model({name: "John"})
           var heaven = create()
-          heaven[method](model)
-          heaven._read.firstCall.args.must.eql([model])
+          heaven[method](model, EXAMPLE_OPTS)
+          heaven._read.firstCall.args.must.eql([model, EXAMPLE_OPTS])
         })
 
         it("must resolve with the model and assign new attributes",
@@ -164,8 +165,8 @@ describe("Heaven", function() {
       describe("given an array", function() {
         it("must call _read given ids", function() {
           var heaven = create()
-          heaven[method]([42, 69])
-          heaven._read.firstCall.args.must.eql([[42, 69]])
+          heaven[method]([42, 69], EXAMPLE_OPTS)
+          heaven._read.firstCall.args.must.eql([[42, 69], EXAMPLE_OPTS])
         })
 
         it("must resolve with a model given id", function*() {
@@ -196,8 +197,8 @@ describe("Heaven", function() {
           var a = new Model({name: "John"})
           var b = new Model({name: "Mike"})
           var heaven = create()
-          heaven[method]([a, b])
-          heaven._read.firstCall.args.must.eql([[a, b]])
+          heaven[method]([a, b], EXAMPLE_OPTS)
+          heaven._read.firstCall.args.must.eql([[a, b], EXAMPLE_OPTS])
         })
 
         it("must resolve with models given models", function*() {
@@ -472,17 +473,17 @@ describe("Heaven", function() {
     describe("given attributes", function() {
       it("must call _create with serialized model", function() {
         var heaven = create()
-        heaven.create({name: "John"})
+        heaven.create({name: "John"}, EXAMPLE_OPTS)
         heaven._create.callCount.must.equal(1)
-        heaven._create.firstCall.args.must.eql([[{name: "John"}]])
+        heaven._create.firstCall.args.must.eql([[{name: "John"}], EXAMPLE_OPTS])
       })
 
       it("must call _create with inherited attributes", function() {
         var heaven = create()
         var attrs = Object.create({a: 42}); attrs.b = 69
-        heaven.create(attrs)
+        heaven.create(attrs, EXAMPLE_OPTS)
         heaven._create.callCount.must.equal(1)
-        heaven._create.firstCall.args.must.eql([[{a: 42, b: 69}]])
+        heaven._create.firstCall.args.must.eql([[{a: 42, b: 69}], EXAMPLE_OPTS])
       })
 
       it("must resolve with a model and assign new attributes", function*() {
@@ -496,16 +497,16 @@ describe("Heaven", function() {
       it("must not stringify nested plain objects", function() {
         var heaven = create()
         heaven.create({bird: {nest: 1}})
-        heaven._create.firstCall.args.must.eql([[{bird: {nest: 1}}]])
+        heaven._create.firstCall.args[0].must.eql([{bird: {nest: 1}}])
       })
     })
 
     describe("given a model", function() {
       it("must call _create with serialized model", function() {
         var heaven = create()
-        heaven.create(new Model({name: "John"}))
+        heaven.create(new Model({name: "John"}), EXAMPLE_OPTS)
         heaven._create.callCount.must.equal(1)
-        heaven._create.firstCall.args.must.eql([[{name: "John"}]])
+        heaven._create.firstCall.args.must.eql([[{name: "John"}], EXAMPLE_OPTS])
       })
 
       it("must resolve with the model and assign new attributes", function*() {
@@ -519,13 +520,13 @@ describe("Heaven", function() {
       it("must serialize with toJSON if it exists", function() {
         var heaven = create().with({model: Object})
         heaven.create({toJSON: function() { return {name: "Mike"} }})
-        heaven._create.firstCall.args.must.eql([[{name: "Mike"}]])
+        heaven._create.firstCall.args[0].must.eql([{name: "Mike"}])
       })
 
       it("must serialize with toJSON only if it's a function", function() {
         var heaven = create().with({model: Object})
         heaven.create({a: 1, b: 2, toJSON: 3})
-        heaven._create.firstCall.args.must.eql([[{a: 1, b: 2, toJSON: 3}]])
+        heaven._create.firstCall.args[0].must.eql([{a: 1, b: 2, toJSON: 3}])
       })
     })
 
@@ -557,17 +558,19 @@ describe("Heaven", function() {
       it("must call _create given an empty array",
         function*() {
         var heaven = create()
-        yield heaven.create([]).must.then.eql([])
-        heaven._create.firstCall.args.must.eql([[]])
+        yield heaven.create([], EXAMPLE_OPTS).must.then.eql([])
+        heaven._create.firstCall.args.must.eql([[], EXAMPLE_OPTS])
       })
 
       it("must call _create with serialized models given attributes",
         function() {
         var heaven = create()
-        heaven.create([{name: "John"}, {name: "Mike"}])
+        heaven.create([{name: "John"}, {name: "Mike"}], EXAMPLE_OPTS)
         heaven._create.callCount.must.equal(1)
+
         heaven._create.firstCall.args.must.eql([
-          [{name: "John"}, {name: "Mike"}]
+          [{name: "John"}, {name: "Mike"}],
+          EXAMPLE_OPTS
         ])
       })
 
@@ -650,8 +653,11 @@ describe("Heaven", function() {
       it("must call _update with serialized attributes", function() {
         var heaven = create()
         heaven.serialize = compose(upcaseKeys, heaven.serialize)
-        heaven.update(42, {name: "John"})
-        heaven._update.firstCall.args.must.eql([42, {NAME: "John"}])
+        heaven.update(42, {name: "John"}, EXAMPLE_OPTS)
+
+        heaven._update.firstCall.args.must.eql([
+          42, {NAME: "John"}, EXAMPLE_OPTS
+        ])
       })
 
       it("must resolve with updates", function*() {
@@ -663,8 +669,8 @@ describe("Heaven", function() {
       // Support this no-op.
       it("must call _update with empty attributes", function() {
         var heaven = create()
-        heaven.update(42, {})
-        heaven._update.firstCall.args.must.eql([42, {}])
+        heaven.update(42, {}, EXAMPLE_OPTS)
+        heaven._update.firstCall.args.must.eql([42, {}, EXAMPLE_OPTS])
       })
     })
 
@@ -673,8 +679,11 @@ describe("Heaven", function() {
         var heaven = create()
         heaven.serialize = compose(upcaseKeys, heaven.serialize)
         var model = new Model({name: "John"})
-        heaven.update(model)
-        heaven._update.firstCall.args.must.eql([model, {NAME: "John"}])
+        heaven.update(model, undefined, EXAMPLE_OPTS)
+
+        heaven._update.firstCall.args.must.eql([
+          model, {NAME: "John"}, EXAMPLE_OPTS
+        ])
       })
 
       //it("must resolve with the model and assign new attributes", function*() {
@@ -707,8 +716,11 @@ describe("Heaven", function() {
         var heaven = create()
         heaven.serialize = compose(upcaseKeys, heaven.serialize)
         var model = new Model({name: "John"})
-        heaven.update(model, {name: "Mike"})
-        heaven._update.firstCall.args.must.eql([model, {NAME: "Mike"}])
+        heaven.update(model, {name: "Mike"}, EXAMPLE_OPTS)
+
+        heaven._update.firstCall.args.must.eql([
+          model, {NAME: "Mike"}, EXAMPLE_OPTS
+        ])
       })
 
       it("must resolve with updates", function*() {
@@ -760,9 +772,11 @@ describe("Heaven", function() {
 
         var a = new Model({name: "John"})
         var b = new Model({name: "Mike"})
-        yield heaven.update([a, b])
+        yield heaven.update([a, b], undefined, EXAMPLE_OPTS)
 
-        heaven._update.firstCall.args.must.eql([new Map, undefined])
+        heaven._update.firstCall.args.must.eql([
+          new Map, undefined, EXAMPLE_OPTS
+        ])
 
         Array.from(heaven._update.firstCall.args[0]).must.eql([
           [a, {NAME: "John"}],
@@ -809,8 +823,11 @@ describe("Heaven", function() {
       it("must call _update with serialized attributes given ids", function() {
         var heaven = create()
         heaven.serialize = compose(upcaseKeys, heaven.serialize)
-        heaven.update([13, 42], {name: "John"})
-        heaven._update.firstCall.args.must.eql([[13, 42], {NAME: "John"}])
+        heaven.update([13, 42], {name: "John"}, EXAMPLE_OPTS)
+
+        heaven._update.firstCall.args.must.eql([
+          [13, 42], {NAME: "John"}, EXAMPLE_OPTS
+        ])
       })
 
       it("must resolve with updates given ids", function*() {
@@ -825,8 +842,11 @@ describe("Heaven", function() {
        var heaven = create()
        heaven.serialize = compose(upcaseKeys, heaven.serialize)
        var models = [new Model({name: "John"}), new Model({name: "Mike"})]
-       heaven.update(models, {name: "Raul"})
-       heaven._update.firstCall.args.must.eql([models, {NAME: "Raul"}])
+       heaven.update(models, {name: "Raul"}, EXAMPLE_OPTS)
+
+       heaven._update.firstCall.args.must.eql([
+         models, {NAME: "Raul"}, EXAMPLE_OPTS
+       ])
       })
 
       it("must resolve with updates given models", function*() {
@@ -882,8 +902,8 @@ describe("Heaven", function() {
     describe("given an id", function() {
       it("must call _delete", function() {
         var heaven = create()
-        heaven.delete(42)
-        heaven._delete.firstCall.args.must.eql([42])
+        heaven.delete(42, EXAMPLE_OPTS)
+        heaven._delete.firstCall.args.must.eql([42, EXAMPLE_OPTS])
       })
 
       it("must resolve with deletes", function*() {
@@ -896,8 +916,8 @@ describe("Heaven", function() {
     describe("given an array", function() {
       it("must call _delete given ids", function() {
         var heaven = create()
-        heaven.delete([13, 42])
-        heaven._delete.firstCall.args.must.eql([[13, 42]])
+        heaven.delete([13, 42], EXAMPLE_OPTS)
+        heaven._delete.firstCall.args.must.eql([[13, 42], EXAMPLE_OPTS])
       })
 
       it("must resolve with deletes given ids", function*() {

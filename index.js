@@ -32,9 +32,9 @@ Heaven.prototype.with = function(opts) {
  * Search is like `read`, but does not throw Not Found when the given id or an
  * array of ids return no models.
  */
-Heaven.prototype.search = function(query) {
+Heaven.prototype.search = function(query, opts) {
   var self = this
-  var attrs = arguments.length > 0 ? this._read(query) : this._read()
+  var attrs = arguments.length > 0 ? this._read(query, opts) : this._read()
 
   // Should models be assigned to before or after Heaven.prototype.assert?
   return attrs.then(function(attrs) {
@@ -54,16 +54,16 @@ Heaven.prototype.search = function(query) {
   })
 }
 
-Heaven.prototype.read = function(query) {
-  var models = arguments.length > 0 ? this.search(query) : this.search()
+Heaven.prototype.read = function(query, opts) {
+  var models = arguments.length > 0 ? this.search(query, opts) : this.search()
   return models.then(this.assert.bind(this, query))
 }
 
-Heaven.prototype._read = function(query) {
+Heaven.prototype._read = function(query, opts) {
   throw new Error(UNIMPLEMENTED)
 }
 
-Heaven.prototype.create = function(attrs) {
+Heaven.prototype.create = function(attrs, opts) {
   var single = !isArray(attrs)
 
   switch (typeOf(attrs)) {
@@ -79,17 +79,17 @@ Heaven.prototype.create = function(attrs) {
   }
 
   var models = attrs.map(this.new, this)
-  var created = this._create(models.map(this.serialize, this))
+  var created = this._create(models.map(this.serialize, this), opts)
   created = created.then(map.bind(this, this.parse))
   models = created.then(zipWith.bind(this, this.assign, models))
   return single ? models.then(singleify) : models
 }
 
-Heaven.prototype._create = function(attrs) {
+Heaven.prototype._create = function(attrs, opts) {
   throw new Error(UNIMPLEMENTED)
 }
 
-Heaven.prototype.update = function(query, attrs) {
+Heaven.prototype.update = function(query, attrs, opts) {
   var type = this.typeof(query)
   if (type === "model" && attrs === undefined) attrs = query
 
@@ -105,18 +105,18 @@ Heaven.prototype.update = function(query, attrs) {
     default: throw new TypeError(BAD_ATTRS + attrs)
   }
 
-  return this._update(query, attrs)
+  return this._update(query, attrs, opts)
 }
 
-Heaven.prototype._update = function(query, attrs) {
+Heaven.prototype._update = function(query, attrs, opts) {
   throw new Error(UNIMPLEMENTED)
 }
 
-Heaven.prototype.delete = function(query) {
-  return arguments.length > 0 ? this._delete(query) : this._delete()
+Heaven.prototype.delete = function(query, opts) {
+  return arguments.length > 0 ? this._delete(query, opts) : this._delete()
 }
 
-Heaven.prototype._delete = function(query) {
+Heaven.prototype._delete = function(query, opts) {
   throw new Error(UNIMPLEMENTED)
 }
 
