@@ -1,4 +1,4 @@
-## Unreleased
+## 0.9.0 (Oct 8, 2016)
 - Removes support for delegating to `_read` with 0 arguments if `Heaven.prototype.read` was called with no arguments.  
   With a second `options` argument any implementation will have to support a special "all models" argument anyway. Might as well make it explicit.
 
