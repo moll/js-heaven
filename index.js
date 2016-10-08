@@ -34,7 +34,7 @@ Heaven.prototype.with = function(opts) {
  */
 Heaven.prototype.search = function(query, opts) {
 	var self = this
-	var attrs = arguments.length > 0 ? this._read(query, opts) : this._read()
+	var attrs = this._read(query, opts)
 
 	// Should models be assigned to before or after Heaven.prototype.assert?
 	return attrs.then(function(attrs) {
@@ -55,8 +55,7 @@ Heaven.prototype.search = function(query, opts) {
 }
 
 Heaven.prototype.read = function(query, opts) {
-	var models = arguments.length > 0 ? this.search(query, opts) : this.search()
-	return models.then(this.assert.bind(this, query))
+	return this.search(query, opts).then(this.assert.bind(this, query))
 }
 
 Heaven.prototype._read = function(query, opts) {

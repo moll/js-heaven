@@ -92,7 +92,7 @@ describe("Heaven", function() {
 				it("must call _read", function() {
 					var heaven = create()
 					heaven[method]()
-					heaven._read.firstCall.args.must.eql([])
+					heaven._read.firstCall.args.must.eql([undefined, undefined])
 				})
 
 				it("must resolve with an array of models", function*() {
