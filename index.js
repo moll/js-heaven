@@ -5,7 +5,7 @@ var assign = require("oolong").assign
 var isArray = Array.isArray
 var BAD_ATTRS = "Bad Attributes: "
 var NOT_FOUND = "Not Found"
-var DUPLICATE = "Duplicate Detected"
+var MORE_FOUND = "More Than Expected"
 var UNIMPLEMENTED = "Unimplemented"
 module.exports = Heaven
 
@@ -187,7 +187,7 @@ Heaven.prototype.assert = function(query, models) {
 
 		case "array":
 			if (models.length < query.length) throw new HeavenError(404, NOT_FOUND)
-			if (models.length > query.length) throw new HeavenError(508, DUPLICATE)
+			if (models.length > query.length) throw new HeavenError(508, MORE_FOUND)
 			return models
 
 		default: return models

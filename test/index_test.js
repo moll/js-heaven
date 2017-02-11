@@ -427,7 +427,7 @@ describe("Heaven", function() {
 
 				var err
 				try { yield heaven.read([42, 69]) } catch (ex) { err = ex }
-				err.must.be.an.error(HeavenError, /duplicate/i)
+				err.must.be.an.error(HeavenError, "More Than Expected")
 				err.code.must.equal(508)
 			})
 
