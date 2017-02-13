@@ -35,7 +35,7 @@ Model.prototype.set = function(attrs) {
 }
 
 describe("Heaven", function() {
-	function create(opts) {
+	function create() {
 		var heaven = new HeavenOnTest(Model)
 		heaven._read = Sinon.spy(resolve)
 		heaven._create = Sinon.spy(resolve)

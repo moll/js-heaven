@@ -58,7 +58,7 @@ Heaven.prototype.read = function(query, opts) {
 	return this.search(query, opts).then(this.assert.bind(this, query))
 }
 
-Heaven.prototype._read = function(query, opts) {
+Heaven.prototype._read = function(_query, _opts) {
 	throw new Error(UNIMPLEMENTED)
 }
 
@@ -84,7 +84,7 @@ Heaven.prototype.create = function(attrs, opts) {
 	return single ? models.then(singleify) : models
 }
 
-Heaven.prototype._create = function(attrs, opts) {
+Heaven.prototype._create = function(_attrs, _opts) {
 	throw new Error(UNIMPLEMENTED)
 }
 
@@ -107,7 +107,7 @@ Heaven.prototype.update = function(query, attrs, opts) {
 	return this._update(query, attrs, opts)
 }
 
-Heaven.prototype._update = function(query, attrs, opts) {
+Heaven.prototype._update = function(_query, _attrs, _opts) {
 	throw new Error(UNIMPLEMENTED)
 }
 
@@ -115,7 +115,7 @@ Heaven.prototype.delete = function(query, opts) {
 	return arguments.length > 0 ? this._delete(query, opts) : this._delete()
 }
 
-Heaven.prototype._delete = function(query, opts) {
+Heaven.prototype._delete = function(_query, _opts) {
 	throw new Error(UNIMPLEMENTED)
 }
 
@@ -173,7 +173,7 @@ Heaven.prototype.identify = function(model) {
 
 Heaven.prototype.typeof = function(query) {
 	var type = typeOf(query)
-	if (type == "object" && query instanceof this.model) return "model"
+	if (type === "object" && query instanceof this.model) return "model"
 	return type
 }
 
