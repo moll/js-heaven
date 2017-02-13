@@ -19,12 +19,12 @@ Heaven.prototype.idAttribute = "id"
 Heaven.prototype.numberAttribute = "id"
 Heaven.prototype.stringAttribute = "uuid"
 
-Heaven.prototype.with = function(opts) {
+Heaven.prototype.with = function(props) {
 	var heaven = Object.create(this)
-	if (opts.model) heaven.model = opts.model
-	if (opts.idAttribute) heaven.idAttribute = opts.idAttribute
-	if (opts.numberAttribute) heaven.numberAttribute = opts.numberAttribute
-	if (opts.stringAttribute) heaven.stringAttribute = opts.stringAttribute
+	if (props.model) heaven.model = props.model
+	if (props.idAttribute) heaven.idAttribute = props.idAttribute
+	if (props.numberAttribute) heaven.numberAttribute = props.numberAttribute
+	if (props.stringAttribute) heaven.stringAttribute = props.stringAttribute
 	return heaven
 }
 
