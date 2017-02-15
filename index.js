@@ -162,10 +162,10 @@ Heaven.prototype.assign = function(model, attrs) {
 }
 
 Heaven.prototype.assignArray = function(models, attrs) {
-	models = _.indexBy(models, this.identify, this)
+	var modelsById = _.indexBy(models, this.identify, this)
 
 	return attrs.map(function(attrs) {
-		return this.assign(models[this.identify(attrs)], attrs)
+		return this.assign(modelsById[this.identify(attrs)], attrs)
 	}, this)
 }
 
