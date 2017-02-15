@@ -1,5 +1,6 @@
 ## Unreleased
 - Adds `Heaven.prototype.group` as a step before parsing.
+- Removes runtime dependency on Oolong.js as it's not necessary.
 
 ## 0.9.0 (Oct 8, 2016)
 - Removes support for delegating to `_read` with 0 arguments if `Heaven.prototype.read` was called with no arguments.  

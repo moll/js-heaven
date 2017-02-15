@@ -1,7 +1,6 @@
 var _ = require("./lib")
 var HeavenError = require("./error")
 var Map = global.Map || function Map() { throw new ReferenceError("No Map") }
-var assign = require("oolong").assign
 var isArray = Array.isArray
 var BAD_ATTRS = "Bad Attributes: "
 var NOT_FOUND = "Not Found"
@@ -157,7 +156,8 @@ Heaven.prototype.new = function(attrs) {
 }
 
 Heaven.prototype.assign = function(model, attrs) {
-	return assign(model, attrs)
+	for (var key in attrs) model[key] = attrs[key]
+	return model
 }
 
 Heaven.prototype.assignArray = function(models, attrs) {
