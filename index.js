@@ -1,6 +1,8 @@
-var _ = require("./lib")
 var HeavenError = require("./error")
 var Map = global.Map || function Map() { throw new ReferenceError("No Map") }
+var indexBy = require("lodash.indexby")
+var zip = require("lodash.zip")
+var zipWith2 = require("lodash.zipwith")
 var isArray = Array.isArray
 var BAD_ATTRS = "Bad Attributes: "
 var NOT_FOUND = "Not Found"
@@ -93,7 +95,7 @@ Heaven.prototype.update = function(query, attrs, opts) {
 	switch (typeOf(attrs)) {
 		case "undefined":
 			if (type === "array" && query.every(isModel.bind(null, this)))
-				query = new Map(_.zip(query, query.map(this.serialize, this)))
+				query = new Map(zip(query, query.map(this.serialize, this)))
 			else if (type !== "map")
 				throw new TypeError(BAD_ATTRS + "undefined")
 			break
@@ -161,7 +163,7 @@ Heaven.prototype.assign = function(model, attrs) {
 }
 
 Heaven.prototype.assignArray = function(models, attrs) {
-	var modelsById = _.indexBy(models, this.identify, this)
+	var modelsById = indexBy(models, this.identify, this)
 
 	return attrs.map(function(attrs) {
 		return this.assign(modelsById[this.identify(attrs)], attrs)
@@ -210,7 +212,7 @@ function typeOf(obj) {
 }
 
 function map(fn, array) { return array.map(fn, this) }
-function zipWith(fn, a, b) { return _.zipWith(a, b, fn, this) }
+function zipWith(fn, a, b) { return zipWith2(a, b, fn, this) }
 function isNully(value) { return value == null }
 function isModel(heaven, value) { return heaven.typeof(value) === "model" }
 function singleify(array) { return array.length > 0 ? array[0] : null }
