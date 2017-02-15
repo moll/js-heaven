@@ -36,9 +36,9 @@ Heaven.prototype.search = function(query, opts) {
 	var self = this
 	var attrs = this._read(query, opts)
 
-	// Should models be assigned to before or after Heaven.prototype.assert?
 	return attrs.then(function(attrs) {
 		if (attrs == null) return null
+		attrs = self.group(query, attrs)
 		attrs = isArray(attrs) ? attrs.map(self.parse, self) : self.parse(attrs)
 
 		switch (self.typeof(query)) {
@@ -117,6 +117,14 @@ Heaven.prototype.delete = function(query, opts) {
 
 Heaven.prototype._delete = function(_query, _opts) {
 	throw new Error(UNIMPLEMENTED)
+}
+
+/**
+ * Group is optionally grouping the result or result set from the database
+ * before parsing.
+ */
+Heaven.prototype.group = function(_query, attrs) {
+	return attrs
 }
 
 /**
