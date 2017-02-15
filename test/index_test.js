@@ -21,18 +21,13 @@ HeavenOnTest.prototype.identify = function(model) {
 }
 
 HeavenOnTest.prototype.assign = function(model, attrs) {
-	return model.set(attrs)
+	return model.set(attrs), model
 }
 
 // Saving attributes to this.attributes catches double model initialization.
 function Model(attrs) { this.attributes = attrs }
-
+Model.prototype.set = function(attrs) { O.assign(this.attributes, attrs) }
 Model.prototype.toJSON = function() { return this.attributes }
-
-Model.prototype.set = function(attrs) {
-	O.assign(this.attributes, attrs)
-	return this
-}
 
 describe("Heaven", function() {
 	function create() {
