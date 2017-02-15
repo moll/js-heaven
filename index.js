@@ -34,9 +34,8 @@ Heaven.prototype.with = function(props) {
  */
 Heaven.prototype.search = function(query, opts) {
 	var self = this
-	var attrs = this._read(query, opts)
 
-	return attrs.then(function(attrs) {
+	return this._read(query, opts).then(function(attrs) {
 		if (attrs == null) return null
 		attrs = self.group(query, attrs)
 		attrs = isArray(attrs) ? attrs.map(self.parse, self) : self.parse(attrs)
