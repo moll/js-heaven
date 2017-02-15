@@ -1,4 +1,4 @@
-## Unreleased
+## 0.9.1 (Feb 15, 2017)
 - Adds `Heaven.prototype.group` as a step before parsing.
 - Removes runtime dependency on Oolong.js as it's not necessary.
 
