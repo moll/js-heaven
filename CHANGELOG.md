@@ -1,3 +1,6 @@
+## Unreleased
+- Removes defaults for `numberAttribute` and `stringAttribute` and their inheriting as they're not used by Heaven itself.
+
 ## 0.9.1 (Feb 15, 2017)
 - Adds `Heaven.prototype.group` as a step before parsing.
 - Removes runtime dependency on Oolong.js as it's not necessary.

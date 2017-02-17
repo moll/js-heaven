@@ -65,16 +65,6 @@ describe("Heaven", function() {
 		it("must set idAttribute", function() {
 			new Heaven().with({idAttribute: "uid"}).idAttribute.must.equal("uid")
 		})
-
-		it("must set numberAttribute", function() {
-			var heaven = new Heaven().with({numberAttribute: "uid"})
-			heaven.numberAttribute.must.equal("uid")
-		})
-
-		it("must set stringAttribute", function() {
-			var heaven = new Heaven().with({stringAttribute: "uid"})
-			heaven.stringAttribute.must.equal("uid")
-		})
 	})
 
 	function mustBeReadable(method) {

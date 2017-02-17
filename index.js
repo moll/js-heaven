@@ -14,18 +14,13 @@ function Heaven(model) {
 	if (model) this.model = model
 }
 
-// Standardizing numberAttribute and stringAttribute for code outside of Heaven.
 Heaven.prototype.model = Object
 Heaven.prototype.idAttribute = "id"
-Heaven.prototype.numberAttribute = "id"
-Heaven.prototype.stringAttribute = "uuid"
 
 Heaven.prototype.with = function(props) {
 	var heaven = Object.create(this)
-	if (props.model) heaven.model = props.model
-	if (props.idAttribute) heaven.idAttribute = props.idAttribute
-	if (props.numberAttribute) heaven.numberAttribute = props.numberAttribute
-	if (props.stringAttribute) heaven.stringAttribute = props.stringAttribute
+	if ("model" in props) heaven.model = props.model
+	if ("idAttribute" in props) heaven.idAttribute = props.idAttribute
 	return heaven
 }
 
