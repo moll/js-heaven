@@ -41,7 +41,7 @@ Heaven.prototype.search = function(query, opts) {
 				return self.assign(query, attrs)
 
 			case "array":
-				if (query.length > 0 && query.every(isModel.bind(null, self)))
+				if (query.length > 0 && query.every(isInstance.bind(null, self.model)))
 					return self.assignArray(query, attrs)
 		}
 
@@ -89,7 +89,7 @@ Heaven.prototype.update = function(query, attrs, opts) {
 
 	switch (typeOf(attrs)) {
 		case "undefined":
-			if (type === "array" && query.every(isModel.bind(null, this)))
+			if (type === "array" && query.every(isInstance.bind(null, this.model)))
 				query = new Map(zip(query, query.map(this.serialize, this)))
 			else if (type !== "map")
 				throw new TypeError(BAD_ATTRS + "undefined")
@@ -176,9 +176,7 @@ Heaven.prototype.identify = function(model) {
 }
 
 Heaven.prototype.typeof = function(query) {
-	var type = typeOf(query)
-	if (type === "object" && query instanceof this.model) return "model"
-	return type
+	return query instanceof this.model ? "model" : typeOf(query)
 }
 
 Heaven.prototype.assert = function(query, models) {
@@ -209,5 +207,5 @@ function typeOf(obj) {
 function map(fn, array) { return array.map(fn, this) }
 function zipWith(fn, a, b) { return zipWith2(a, b, fn, this) }
 function isNully(value) { return value == null }
-function isModel(heaven, value) { return heaven.typeof(value) === "model" }
+function isInstance(model, value) { return value instanceof model }
 function singleify(array) { return array.length > 0 ? array[0] : null }
