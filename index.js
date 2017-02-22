@@ -72,7 +72,7 @@ Heaven.prototype.create = function(attrs, opts) {
 		default: throw new TypeError(BAD_ATTRS + attrs)
 	}
 
-	var models = attrs.map(this.new, this)
+	var models = attrs.map(make.bind(null, this.model, this.new.bind(this)))
 	var created = this._create(models.map(this.serialize, this), opts)
 	created = created.then(map.bind(this, this.parse))
 	models = created.then(zipWith.bind(this, this.assign, models))
@@ -149,7 +149,7 @@ Heaven.prototype.serialize = function(model) {
 }
 
 Heaven.prototype.new = function(attrs) {
-	return attrs instanceof this.model ? attrs : new this.model(attrs)
+	return new this.model(attrs)
 }
 
 Heaven.prototype.assign = function(model, attrs) {
@@ -202,6 +202,10 @@ function typeOf(obj) {
 	if (obj instanceof RegExp) return "regexp"
 	if (obj instanceof Map) return "map"
 	return typeof obj
+}
+
+function make(klass, create, attrs) {
+	return attrs instanceof klass ? attrs : create(attrs)
 }
 
 function map(fn, array) { return array.map(fn, this) }

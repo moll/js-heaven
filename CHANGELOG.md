@@ -1,5 +1,6 @@
 ## Unreleased
 - Removes defaults for `numberAttribute` and `stringAttribute` and their inheriting as they're not used by Heaven itself.
+- Changes `Heaven.prototype.new` function signature to only take plain objects and not also model instances.
 
 ## 0.9.1 (Feb 15, 2017)
 - Adds `Heaven.prototype.group` as a step before parsing.
