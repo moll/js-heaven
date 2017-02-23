@@ -670,30 +670,6 @@ describe("Heaven", function() {
 					model, {NAME: "John"}, EXAMPLE_OPTS
 				])
 			})
-
-			//it("must resolve with the model and assign new attributes", function*() {
-			//	var heaven = create()
-			//	heaven._update = promise({id: 13})
-			//	var model = new Model({name: "John"})
-			//	yield heaven.update(model, {name: "Mike"}).must.then.equal(model)
-			//	model.must.eql(new Model({id: 13, name: "John"}))
-			//})
-
-			//it("must resolve with the model if undefined returned", function*() {
-			//	var heaven = create()
-			//	heaven._update = promise(undefined)
-			//	var model = new Model({name: "John"})
-			//	yield heaven.update(model).must.then.equal(model)
-			//	model.must.eql(new Model({name: "John"}))
-			//})
-
-			//it("must resolve with the model if null returned", function*() {
-			//	var heaven = create()
-			//	heaven._update = promise(null)
-			//	var model = new Model({name: "John"})
-			//	yield heaven.update(model).must.then.equal(model)
-			//	model.must.eql(new Model({name: "John"}))
-			//})
 		})
 
 		describe("given a model and attributes", function() {
@@ -723,30 +699,6 @@ describe("Heaven", function() {
 				yield heaven.update(model, {name: "Mike"}).must.then.equal(null)
 				model.must.eql(new Model({name: "John"}))
 			})
-
-			//it("must resolve with the model and assign new attributes", function*() {
-			//	var heaven = create()
-			//	heaven._update = promise({id: 13})
-			//	var model = new Model({name: "John"})
-			//	yield heaven.update(model, {name: "Mike"}).must.then.equal(model)
-			//	model.must.eql(new Model({id: 13, name: "John"}))
-			//})
-
-			//it("must resolve with the model if undefined returned", function*() {
-			//	var heaven = create()
-			//	heaven._update = promise(undefined)
-			//	var model = new Model({name: "John"})
-			//	yield heaven.update(model, {name: "Mike"}).must.then.equal(model)
-			//	model.must.eql(new Model({name: "John"}))
-			//})
-
-			//it("must resolve with the model if null returned", function*() {
-			//	var heaven = create()
-			//	heaven._update = promise(null)
-			//	var model = new Model({name: "John"})
-			//	yield heaven.update(model, {name: "Mike"}).must.then.equal(model)
-			//	model.must.eql(new Model({name: "John"}))
-			//})
 		})
 
 		describe("given an array", function() {
@@ -779,23 +731,6 @@ describe("Heaven", function() {
 				a.must.eql(new Model({name: "John"}))
 				b.must.eql(new Model({name: "Mike"}))
 			})
-
-			//it("must resolve with the model and assign new attributes given models",
-			//	function*() {
-			//	var heaven = create()
-			//	heaven._update = promise([{id: 13}, {id: 42}])
-			//	var a = new Model({name: "John"})
-			//	var b = new Model({name: "Mike"})
-			//	var updated = yield heaven.update([a, b])
-
-			//	updated.must.be.an.array()
-			//	updated.length.must.equal(2)
-			//	updated[0].must.equal(a)
-			//	updated[1].must.equal(b)
-
-			//	a.must.eql(new Model({id: 13, name: "John"}))
-			//	b.must.eql(new Model({id: 42, name: "Mike"}))
-			//})
 		})
 
 		describe("given an array and attributes", function() {
@@ -845,23 +780,6 @@ describe("Heaven", function() {
 				a.must.eql(new Model({name: "John"}))
 				b.must.eql(new Model({name: "Mike"}))
 			})
-
-			//it("must resolve with the model and assign new attributes given models",
-			//	function*() {
-			//	var heaven = create()
-			//	heaven._update = promise([{id: 13}, {id: 42}])
-			//	var a = new Model({name: "John"})
-			//	var b = new Model({name: "Mike"})
-			//	var updated = yield heaven.update([a, b], {name: "Raul"})
-
-			//	updated.must.be.an.array()
-			//	updated.length.must.equal(2)
-			//	updated[0].must.equal(a)
-			//	updated[1].must.equal(b)
-
-			//	a.must.eql(new Model({id: 13, name: "John"}))
-			//	b.must.eql(new Model({id: 42, name: "Mike"}))
-			//})
 		})
 	})
 
