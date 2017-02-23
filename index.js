@@ -106,7 +106,7 @@ Heaven.prototype._update = function(_query, _attrs, _opts) {
 }
 
 Heaven.prototype.delete = function(query, opts) {
-	return arguments.length > 0 ? this._delete(query, opts) : this._delete()
+	return this._delete(query, opts)
 }
 
 Heaven.prototype._delete = function(_query, _opts) {

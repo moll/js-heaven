@@ -874,7 +874,7 @@ describe("Heaven", function() {
 			it("must call _delete", function() {
 				var heaven = create()
 				heaven.delete()
-				heaven._delete.firstCall.args.must.eql([])
+				heaven._delete.firstCall.args.must.eql([undefined, undefined])
 			})
 
 			it("must resolve with deletes", function*() {
