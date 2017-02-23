@@ -1,5 +1,4 @@
 var HeavenError = require("./error")
-var Map = global.Map || function Map() { throw new ReferenceError("No Map") }
 var indexBy = require("lodash.indexby")
 var zip = require("lodash.zip")
 var zipWith2 = require("lodash.zipwith")
