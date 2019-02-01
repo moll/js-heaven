@@ -26,6 +26,10 @@ Heaven.prototype.with = function(props) {
 /**
  * Search is like `read`, but does not throw Not Found when the given id or an
  * array of ids return no models.
+ *
+ * Note that you cannot depend that the order of the returned models matches
+ * the order in the query. That's because either databases may reorder their
+ * response or because not all rows matched.
  */
 Heaven.prototype.search = function(query, opts) {
 	var self = this
