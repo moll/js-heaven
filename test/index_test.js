@@ -659,7 +659,7 @@ describe("Heaven", function() {
 			})
 		})
 
-		describe("given a model and attributes", function() {
+		describe("given a model", function() {
 			it("must call _update with serialized model", function() {
 				var heaven = create()
 				heaven.serialize = compose(upcaseKeys, heaven.serialize)
