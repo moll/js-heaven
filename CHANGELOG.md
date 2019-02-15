@@ -1,3 +1,6 @@
+## Unreleased
+- Fixes `Heaven.prototype.typeOf` given an array if model set to `Object`.
+
 ## 0.10.0 (Feb 23, 2017)
 - Removes defaults for `numberAttribute` and `stringAttribute` and their inheriting as they're not used by Heaven itself.
 - Changes `Heaven.prototype.new` function signature to only take plain objects and not also model instances.

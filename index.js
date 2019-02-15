@@ -179,7 +179,8 @@ Heaven.prototype.identify = function(model) {
 }
 
 Heaven.prototype.typeof = function(query) {
-	return query instanceof this.model ? "model" : typeOf(query)
+	var kind = typeOf(query)
+	return kind == "object" && query instanceof this.model ? "model" : kind
 }
 
 Heaven.prototype.assert = function(query, models) {

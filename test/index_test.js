@@ -849,6 +849,10 @@ describe("Heaven", function() {
 			it("must return \"array\" given Array.prototype", function() {
 				new HeavenOnTest().typeof(Array.prototype).must.equal("array")
 			})
+
+			it("must return \"array\" given Object as model", function() {
+				new HeavenOnTest(Object).typeof([]).must.equal("array")
+			})
 		})
 
 		describe("given RegExp", function() {
@@ -860,6 +864,16 @@ describe("Heaven", function() {
 		describe("given Map", function() {
 			it("must return \"map\"", function() {
 				new HeavenOnTest().typeof(new Map).must.equal("map")
+			})
+		})
+
+		describe("given Object", function() {
+			it("must return \"object\"", function() {
+				new HeavenOnTest().typeof({}).must.equal("object")
+			})
+
+			it("must return \"model\" given Object as model", function() {
+				new HeavenOnTest(Object).typeof({}).must.equal("model")
 			})
 		})
 	})
