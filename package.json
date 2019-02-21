@@ -1,13 +1,13 @@
 {
 	"name": "@moll/heaven",
 	"version": "0.10.0",
-	"description": "",
+	"description": "A library for abstracting databases and resources through Table Data Gateway.",
 	"keywords": [],
 
 	"author": {
 		"name": "Andri Möll",
 		"email": "andri@dot.ee",
-		"url": "http://themoll.com"
+		"url": "https://m811.com"
 	},
 
 	"main": "index.js",
