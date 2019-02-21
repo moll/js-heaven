@@ -1,4 +1,4 @@
-## Unreleased
+## 0.10.1 (Feb 21, 2019)
 - Fixes `Heaven.prototype.typeOf` given an array if model set to `Object`.
 
 ## 0.10.0 (Feb 23, 2017)
