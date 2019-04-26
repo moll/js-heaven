@@ -1,3 +1,10 @@
+## Unreleased
+- Changes the semantics of `Heaven.prototype.search` and `Heaven.prototype.read` to always return an array and a single model respectively.  
+  No response array length comparisons to query length or null checking done.
+- Removes `HeavenError` now that `Heaven.prototype.read` doesn't throw errors.
+- The `Heaven.prototype.search` method now calls `Heaven.prototype._search` for its implementation.  
+  Previously both `Heaven.prototype.search` and `Heaven.prototype.read` called `Heaven.prototype._read`. This permits a more efficient implementation for getting a single model. The default of `Heaven.prototype._read` is to delegate to `Heaven.prototype._search` and get the array's first element.
+
 ## 0.10.1 (Feb 21, 2019)
 - Fixes `Heaven.prototype.typeOf` given an array if model set to `Object`.
 

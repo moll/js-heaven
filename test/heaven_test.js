@@ -1,6 +1,5 @@
 var O = require("oolong")
 var Heaven = require("..")
-var HeavenError = require("../error")
 var Sinon = require("sinon")
 var isPrototypeOf = Function.call.bind(Object.isPrototypeOf)
 var compose = require("lodash.compose")
@@ -8,6 +7,9 @@ var promise = compose(constant, Promise.resolve.bind(Promise))
 var resolve = Promise.resolve.bind(Promise)
 var toUpperCase = Function.call.bind(String.prototype.toUpperCase)
 var EXAMPLE_OPTS = {deleted: true}
+
+process.removeAllListeners("unhandledRejection")
+process.on("unhandledRejection", function() {})
 
 function HeavenOnTest(model) { Heaven.call(this, model) }
 
@@ -33,6 +35,7 @@ Model.prototype.toJSON = function() { return this.attributes }
 
 describe("Heaven", function() {
 	function spy(heaven) {
+		heaven._search = Sinon.spy(resolve)
 		heaven._read = Sinon.spy(resolve)
 		heaven._create = Sinon.spy(resolve)
 		heaven._update = Sinon.spy(resolve)
@@ -68,257 +71,154 @@ describe("Heaven", function() {
 		})
 	})
 
-	function mustBeReadable(method) {
-		describe("as a readable method", function() {
-			it("must return a promise", function() {
-				spy(new HeavenOnTest)[method]().then.must.be.a.function()
-			})
-
-			describe("given nothing", function() {
-				it("must call _read", function() {
-					var heaven = spy(new HeavenOnTest)
-					heaven[method]()
-					heaven._read.firstCall.args.must.eql([undefined, undefined])
-				})
-
-				it("must resolve with an array of models", function*() {
-					var heaven = spy(new HeavenOnTest)
-					heaven._read = promise([{name: "John"}, {name: "Mike"}])
-
-					yield heaven[method]().must.then.eql([
-						new Model({name: "John"}),
-						new Model({name: "Mike"})
-					])
-				})
-
-				it("must resolve with an empty array if no models", function*() {
-					var heaven = spy(new HeavenOnTest)
-					heaven._read = promise([])
-					yield heaven[method]().must.then.eql([])
-				})
-			})
-
-			describe("given an id", function() {
-				it("must call _read", function() {
-					var heaven = spy(new HeavenOnTest)
-					heaven[method](42, EXAMPLE_OPTS)
-					heaven._read.firstCall.args.must.eql([42, EXAMPLE_OPTS])
-				})
-
-				it("must resolve with a model", function*() {
-					var heaven = spy(new HeavenOnTest)
-					heaven._read = promise({name: "John"})
-					yield heaven[method](42).must.then.eql(new Model({name: "John"}))
-				})
-
-				it("must resolve with an array of models", function*() {
-					var heaven = spy(new HeavenOnTest)
-					heaven._read = promise([{name: "John"}, {name: "Mike"}])
-
-					yield heaven[method](42).must.then.eql([
-						new Model({name: "John"}),
-						new Model({name: "Mike"})
-					])
-				})
-
-				// Protects against naive boolean checks.
-				it("must parse 0 to model", function*() {
-					/* eslint no-new-wrappers: 0 */
-					var heaven = new HeavenOnTest().with({model: Number})
-					heaven._read = promise(0)
-					yield heaven[method]("Zero").must.then.eql(new Number(0))
-				})
-			})
-
-			describe("given a model", function() {
-				it("must call _read", function() {
-					var model = new Model({name: "John"})
-					var heaven = spy(new HeavenOnTest)
-					heaven[method](model, EXAMPLE_OPTS)
-					heaven._read.firstCall.args.must.eql([model, EXAMPLE_OPTS])
-				})
-
-				it("must resolve with the model and assign new attributes",
-					function*() {
-					var model = new Model({name: "John"})
-					var heaven = spy(new HeavenOnTest)
-					heaven._read = promise({name: "Raul"})
-					yield heaven[method](model).must.then.eql(new Model({name: "Raul"}))
-					model.must.eql(new Model({name: "Raul"}))
-				})
-			})
-
-			describe("given an array", function() {
-				it("must call _read given ids", function() {
-					var heaven = spy(new HeavenOnTest)
-					heaven[method]([42, 69], EXAMPLE_OPTS)
-					heaven._read.firstCall.args.must.eql([[42, 69], EXAMPLE_OPTS])
-				})
-
-				it("must resolve with a model given id", function*() {
-					var heaven = spy(new HeavenOnTest)
-					heaven._read = promise([{name: "John"}])
-					yield heaven[method]([42]).must.then.eql([new Model({name: "John"})])
-				})
-
-				it("must resolve with an array of models given ids", function*() {
-					var heaven = spy(new HeavenOnTest)
-					heaven._read = promise([{name: "John"}, {name: "Mike"}])
-
-					yield heaven[method]([42, 69]).must.then.eql([
-						new Model({name: "John"}),
-						new Model({name: "Mike"})
-					])
-				})
-
-				// Protects against naive boolean checks.
-				it("must parse 0 to model given ids", function*() {
-					/* eslint no-new-wrappers: 0 */
-					var heaven = new HeavenOnTest().with({model: Number})
-					heaven._read = promise([0])
-					yield heaven[method](["Zero"]).must.then.eql([new Number(0)])
-				})
-
-				it("must call _read given models", function() {
-					var a = new Model({name: "John"})
-					var b = new Model({name: "Mike"})
-					var heaven = spy(new HeavenOnTest)
-					heaven[method]([a, b], EXAMPLE_OPTS)
-					heaven._read.firstCall.args.must.eql([[a, b], EXAMPLE_OPTS])
-				})
-
-				it("must resolve with models given models", function*() {
-					var a = new Model({id: 13, name: "John"})
-					var b = new Model({id: 42, name: "Mike"})
-
-					var heaven = spy(new HeavenOnTest)
-					heaven._read = promise([
-						{id: 13, name: "Jane"},
-						{id: 42, name: "Raul"}
-					])
-
-					var models = yield heaven[method]([a, b])
-					models.must.be.an.array()
-					models.length.must.equal(2)
-					models[0].must.equal(a)
-					models[1].must.equal(b)
-
-					a.must.eql(new Model({id: 13, name: "Jane"}))
-					b.must.eql(new Model({id: 42, name: "Raul"}))
-				})
-
-				it("must resolve with unchanged models given models", function*() {
-					var a = new Model({id: 13, name: "John"})
-					var b = new Model({id: 42, name: "Mike"})
-
-					var heaven = spy(new HeavenOnTest)
-					heaven._read = promise([
-						{id: 13, name: "John"},
-						{id: 42, name: "Raul"}
-					])
-
-					var models = yield heaven[method]([a, b])
-					models.must.be.an.array()
-					models.length.must.equal(2)
-					models[0].must.equal(a)
-					models[1].must.equal(b)
-
-					a.must.eql(new Model({id: 13, name: "John"}))
-					b.must.eql(new Model({id: 42, name: "Raul"}))
-				})
-
-				it("must resolve with models by ids given models", function*() {
-					var a = new Model({id: 13, name: "John"})
-					var b = new Model({id: 42, name: "Mike"})
-
-					var heaven = spy(new HeavenOnTest)
-					heaven._read = promise([
-						{id: 42, name: "Raul"},
-						{id: 13, name: "Jane"}
-					])
-
-					var models = yield heaven[method]([a, b])
-					models.must.be.an.array()
-					models.length.must.equal(2)
-					models[0].must.equal(b)
-					models[1].must.equal(a)
-
-					a.must.eql(new Model({id: 13, name: "Jane"}))
-					b.must.eql(new Model({id: 42, name: "Raul"}))
-				})
-			})
-		})
-	}
-
 	describe(".prototype.search", function() {
-		mustBeReadable("search")
-
 		describe("given an id", function() {
-			it("must resolve with null if undefined returned", function*() {
+			it("must call _search", function() {
 				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise(undefined)
-				yield heaven.search(42).must.then.equal(null)
+				heaven.search(42, EXAMPLE_OPTS)
+				heaven._search.firstCall.args.must.eql([42, EXAMPLE_OPTS])
 			})
 
-			it("must resolve with null if null returned", function*() {
+			it("must resolve with an array of models", function*() {
 				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise(null)
-				yield heaven.search(42).must.then.equal(null)
+				heaven._search = promise([{name: "John"}, {name: "Mike"}])
+
+				yield heaven.search(42).must.then.eql([
+					new Model({name: "John"}),
+					new Model({name: "Mike"})
+				])
+			})
+
+			it("must resolve with empty array if none returned", function*() {
+				var heaven = spy(new HeavenOnTest)
+				heaven._search = promise([])
+				yield heaven.search(42).must.then.eql([])
+			})
+
+			// Protects against naive boolean checks.
+			it("must parse 0 to model", function*() {
+				/* eslint no-new-wrappers: 0 */
+				var heaven = new HeavenOnTest().with({model: Number})
+				heaven._search = promise([0])
+				yield heaven.search("Zero").must.then.eql([new Number(0)])
 			})
 		})
 
 		describe("given a model", function() {
-			it("must resolve with null if none returned", function*() {
+			it("must call _search", function() {
 				var model = new Model({name: "John"})
 				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise(null)
-				yield heaven.search(model).must.then.eql(null)
+				heaven.search(model, EXAMPLE_OPTS)
+				heaven._search.firstCall.args.must.eql([model, EXAMPLE_OPTS])
+			})
+
+			it("must resolve with the model and assign new attributes",
+				function*() {
+				var model = new Model({name: "John"})
+				var heaven = spy(new HeavenOnTest)
+				heaven._search = promise([{name: "Raul"}])
+				yield heaven.search(model).must.then.eql([new Model({name: "Raul"})])
+				model.must.eql(new Model({name: "Raul"}))
+			})
+
+			it("must resolve with empty array if none returned", function*() {
+				var model = new Model({name: "John"})
+				var heaven = spy(new HeavenOnTest)
+				heaven._search = promise([])
+				yield heaven.search(model).must.then.eql([])
 				model.must.eql(new Model({name: "John"}))
 			})
 		})
 
 		describe("given an array", function() {
-			it("must resolve with empty array given an empty array",
-				function*() {
+			it("must call _search given ids", function() {
 				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([])
-				yield heaven.search([]).must.then.eql([])
+				heaven.search([42, 69], EXAMPLE_OPTS)
+				heaven._search.firstCall.args.must.eql([[42, 69], EXAMPLE_OPTS])
 			})
 
-			it("must resolve with empty array if empty array returned given id",
-				function*() {
+			it("must resolve with an array of models given ids", function*() {
 				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([])
-				yield heaven.search([42]).must.then.eql([])
+				heaven._search = promise([{name: "John"}, {name: "Mike"}])
+
+				yield heaven.search([42, 69]).must.then.eql([
+					new Model({name: "John"}),
+					new Model({name: "Mike"})
+				])
+			})
+
+			// Protects against naive boolean checks.
+			it("must parse 0 to model given ids", function*() {
+				/* eslint no-new-wrappers: 0 */
+				var heaven = new HeavenOnTest().with({model: Number})
+				heaven._search = promise([0])
+				yield heaven.search(["Zero"]).must.then.eql([new Number(0)])
+			})
+
+			it("must resolve with empty array given an empty array", function*() {
+				var heaven = spy(new HeavenOnTest)
+				heaven._search = promise([])
+				yield heaven.search([]).must.then.eql([])
 			})
 
 			it("must resolve with models if empty array returned given ids",
 				function*() {
 				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([])
+				heaven._search = promise([])
 				yield heaven.search([42, 69]).must.then.eql([])
 			})
 
-			it("must resolve with models if less returned given ids", function*() {
+			it("must call _search given models", function() {
+				var a = new Model({name: "John"})
+				var b = new Model({name: "Mike"})
 				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([{name: "John"}])
-				yield heaven.search([42, 69]).must.then.eql([new Model({name: "John"})])
+				heaven.search([a, b], EXAMPLE_OPTS)
+				heaven._search.firstCall.args.must.eql([[a, b], EXAMPLE_OPTS])
 			})
 
-			it("must resolve with models if more returned given ids", function*() {
-				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([{name: "John"}, {name: "Mike"}, {name: "Jo"}])
+			it("must resolve with models given models", function*() {
+				var a = new Model({id: 13, name: "John"})
+				var b = new Model({id: 42, name: "Mike"})
 
-				yield heaven.search([42, 69]).must.then.eql([
-					new Model({name: "John"}),
-					new Model({name: "Mike"}),
-					new Model({name: "Jo"})
+				var heaven = spy(new HeavenOnTest)
+				heaven._search = promise([
+					{id: 13, name: "Jane"},
+					{id: 42, name: "Raul"}
 				])
+
+				var models = yield heaven.search([a, b])
+				models.must.be.an.array()
+				models.length.must.equal(2)
+				models[0].must.equal(a)
+				models[1].must.equal(b)
+
+				a.must.eql(new Model({id: 13, name: "Jane"}))
+				b.must.eql(new Model({id: 42, name: "Raul"}))
+			})
+
+			it("must resolve with models by ids given models", function*() {
+				var a = new Model({id: 13, name: "John"})
+				var b = new Model({id: 42, name: "Mike"})
+
+				var heaven = spy(new HeavenOnTest)
+				heaven._search = promise([
+					{id: 42, name: "Raul"},
+					{id: 13, name: "Jane"}
+				])
+
+				var models = yield heaven.search([a, b])
+				models.must.be.an.array()
+				models.length.must.equal(2)
+				models[0].must.equal(b)
+				models[1].must.equal(a)
+
+				a.must.eql(new Model({id: 13, name: "Jane"}))
+				b.must.eql(new Model({id: 42, name: "Raul"}))
 			})
 
 			it("must resolve with models if less returned given models", function*() {
 				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([{id: 13, name: "Jane"}])
+				heaven._search = promise([{id: 42, name: "Jane"}])
 
 				var a = new Model({id: 13, name: "John"})
 				var b = new Model({id: 42, name: "Mike"})
@@ -326,124 +226,77 @@ describe("Heaven", function() {
 				var models = yield heaven.search([a, b])
 				models.must.be.an.array()
 				models.length.must.equal(1)
-				models[0].must.equal(a)
+				models[0].must.equal(b)
 
-				a.must.eql(new Model({id: 13, name: "Jane"}))
-				b.must.eql(new Model({id: 42, name: "Mike"}))
+				a.must.eql(new Model({id: 13, name: "John"}))
+				b.must.eql(new Model({id: 42, name: "Jane"}))
 			})
 		})
 	})
 
 	describe(".prototype.read", function() {
-		mustBeReadable("read")
-
 		describe("given an id", function() {
-			it("must reject with HeavenError if undefined returned", function*() {
+			it("must call _read", function() {
 				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise(undefined)
-
-				var err
-				try { yield heaven.read(42) } catch (ex) { err = ex }
-				err.must.be.an.error(HeavenError, /not found/i)
-				err.code.must.equal(404)
+				heaven.read(42, EXAMPLE_OPTS)
+				heaven._read.firstCall.args.must.eql([42, EXAMPLE_OPTS])
 			})
 
-			it("must reject with HeavenError if null returned", function*() {
+			it("must resolve with a model", function*() {
+				var heaven = spy(new HeavenOnTest)
+				heaven._read = promise({name: "John"})
+				yield heaven.read(42).must.then.eql(new Model({name: "John"}))
+			})
+
+			it("must resolve with null if undefined returned", function*() {
+				var heaven = spy(new HeavenOnTest)
+				heaven._read = promise(undefined)
+				yield heaven.read(42).must.then.equal(null)
+			})
+
+			it("must resolve with null if null returned", function*() {
 				var heaven = spy(new HeavenOnTest)
 				heaven._read = promise(null)
+				yield heaven.read(42).must.then.equal(null)
+			})
 
-				var err
-				try { yield heaven.read(42) } catch (ex) { err = ex }
-				err.must.be.an.error(HeavenError, /not found/i)
-				err.code.must.equal(404)
+			// Protects against naive boolean checks.
+			it("must parse 0 to model", function*() {
+				/* eslint no-new-wrappers: 0 */
+				var heaven = new HeavenOnTest().with({model: Number})
+				heaven._read = promise(0)
+				yield heaven.read("Zero").must.then.eql(new Number(0))
 			})
 		})
 
 		describe("given a model", function() {
+			it("must call _read", function() {
+				var model = new Model({name: "John"})
+				var heaven = spy(new HeavenOnTest)
+				heaven.read(model, EXAMPLE_OPTS)
+				heaven._read.firstCall.args.must.eql([model, EXAMPLE_OPTS])
+			})
+
+			it("must resolve with the model and assign new attributes",
+				function*() {
+				var model = new Model({name: "John"})
+				var heaven = spy(new HeavenOnTest)
+				heaven._read = promise({name: "Raul"})
+				yield heaven.read(model).must.then.eql(new Model({name: "Raul"}))
+				model.must.eql(new Model({name: "Raul"}))
+			})
+
 			it("must resolve with null if none returned", function*() {
+				var model = new Model({name: "John"})
 				var heaven = spy(new HeavenOnTest)
 				heaven._read = promise(null)
-
-				var err
-				try { yield heaven.read(new Model({name: "John"})) }
-				catch (ex) { err = ex }
-				err.must.be.an.error(HeavenError, /not found/i)
-				err.code.must.equal(404)
-			})
-		})
-
-		describe("given an array", function() {
-			it("must reject with HeavenError if none returned given id",
-				function*() {
-				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([])
-
-				var err
-				try { yield heaven.read([42]) } catch (ex) { err = ex }
-				err.must.be.an.error(HeavenError, /not found/i)
-				err.code.must.equal(404)
-			})
-
-			it("must reject with HeavenError if none returned given ids",
-				function*() {
-				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([])
-
-				var err
-				try { yield heaven.read([42, 69]) } catch (ex) { err = ex }
-				err.must.be.an.error(HeavenError, /not found/i)
-				err.code.must.equal(404)
-			})
-
-			it("must reject with HeavenError if less returned given ids",
-				function*() {
-				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([{name: "John"}])
-
-				var err
-				try { yield heaven.read([42, 69]) } catch (ex) { err = ex }
-				err.must.be.an.error(HeavenError, /not found/i)
-				err.code.must.equal(404)
-			})
-
-			it("must reject with HeavenError if more returned given ids",
-				function*() {
-				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([{name: "John"}, {name: "Mike"}, {name: "Jo"}])
-
-				var err
-				try { yield heaven.read([42, 69]) } catch (ex) { err = ex }
-				err.must.be.an.error(HeavenError, "More Than Expected")
-				err.code.must.equal(508)
-			})
-
-			it("must reject with HeavenError if less returned given models",
-				function*() {
-				var heaven = spy(new HeavenOnTest)
-				heaven._read = promise([{id: 13, name: "Jane"}])
-
-				var a = new Model({id: 13, name: "John"})
-				var b = new Model({id: 42, name: "Mike"})
-
-				var err
-				try { yield heaven.read([a, b]) } catch (ex) { err = ex }
-				err.must.be.an.error(HeavenError, /not found/i)
-				err.code.must.equal(404)
+				yield heaven.read(model).must.then.eql(null)
+				model.must.eql(new Model({name: "John"}))
 			})
 		})
 	})
 
 	describe(".prototype.create", function() {
-		it("must return a promise", function() {
-			spy(new HeavenOnTest).create({}).then.must.be.a.function()
-		})
-
-		it("must throw TypeError given nothing", function() {
-			var err
-			try { new HeavenOnTest().create() } catch (ex) { err = ex }
-			err.must.be.an.error(TypeError, /bad attributes/i)
-		})
-
 		it("must throw TypeError given undefined", function() {
 			var err
 			try { new HeavenOnTest().create(undefined) } catch (ex) { err = ex }
@@ -614,13 +467,15 @@ describe("Heaven", function() {
 	})
 
 	describe(".prototype.update", function() {
-		it("must return a promise", function() {
-			spy(new HeavenOnTest).update(42, {name: "John"}).then.must.be.a.function()
+		it("must throw TypeError given undefined", function() {
+			var err
+			try { new HeavenOnTest(undefined).update() } catch (ex) { err = ex }
+			err.must.be.an.error(TypeError, /bad attributes/i)
 		})
 
-		it("must throw TypeError given nothing", function() {
+		it("must throw TypeError given null", function() {
 			var err
-			try { new HeavenOnTest().update() } catch (ex) { err = ex }
+			try { new HeavenOnTest(null).update() } catch (ex) { err = ex }
 			err.must.be.an.error(TypeError, /bad attributes/i)
 		})
 
@@ -787,24 +642,6 @@ describe("Heaven", function() {
 	})
 
 	describe(".prototype.delete", function() {
-		it("must return a promise", function() {
-			spy(new HeavenOnTest).delete(42).then.must.be.a.function()
-		})
-
-		describe("given nothing", function() {
-			it("must call _delete", function() {
-				var heaven = spy(new HeavenOnTest)
-				heaven.delete()
-				heaven._delete.firstCall.args.must.eql([undefined, undefined])
-			})
-
-			it("must resolve with deletes", function*() {
-				var heaven = spy(new HeavenOnTest)
-				heaven._delete = promise([{id: 13}])
-				yield heaven.delete().must.then.eql([{id: 13}])
-			})
-		})
-
 		describe("given an id", function() {
 			it("must call _delete", function() {
 				var heaven = spy(new HeavenOnTest)

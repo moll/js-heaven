@@ -2,7 +2,7 @@
 	"name": "heaven",
 	"version": "0.10.1",
 	"description": "A library for abstracting databases and resources through Table Data Gateway.",
-	"keywords": [],
+	"keywords": ["database", "orm"],
 
 	"author": {
 		"name": "Andri Möll",
@@ -16,8 +16,7 @@
 	"dependencies": {
 		"lodash.zip": ">= 2 < 4",
 		"lodash.zipwith": ">= 2 < 4",
-		"lodash.indexby": ">= 2 < 4",
-		"standard-error": ">= 1 < 2"
+		"lodash.indexby": ">= 2 < 4"
 	},
 
 	"devDependencies": {

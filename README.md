@@ -36,6 +36,14 @@ Web.prototype = Object.create(Heaven.prototype, {
   constructor: {value: Web, configurable: true, writeable: true}
 })
 
+Web.prototype._search = function(query) {
+  switch (this.typeof(query)) {
+    case "undefined":
+    case "null": return fetch(this.url).then(getJson)
+    default: throw new TypeError("Bad Query: " + query)
+  }
+}
+
 Web.prototype._read = function(query) {
   switch (this.typeof(query)) {
     case "number": return fetch(this.url + "/" + query).then(getJson)
@@ -44,11 +52,11 @@ Web.prototype._read = function(query) {
 }
 
 Web.prototype._create = function(attrs) {
-  return Promise.all(attrs.map(JSON.stringify).map(function(json) {
+  return Promise.all(attrs.map(function(attrs) {
     return fetch(this.url, {
       method: "POST",
       headers: "Content-Type": "application/json",
-      body: json
+      body: JSON.stringify(attrs)
     }).then(getJson)
   }, this))
 }
@@ -84,6 +92,12 @@ await cars.update(lada, {name: "Lada"})
 ```
 
 For tweaking how your models are parsed, set `heaven.parse`. For serializing, set `heaven.serialize`. For updating the newly created model with the `id` returned by the server, set `heaven.assign`. For further detail, please see Heaven's source in `index.js`. Especially until more documentation is written.
+
+
+### Using with Mapbox's SQLite3
+If you'd like to use Heaven.js with [Mapbox's SQLite3][node-sqlite3] library, see [Heaven.js for SQLite3](https://github.com/moll/node-heaven-sqlite).
+
+[node-sqlite3]: https://github.com/mapbox/node-sqlite3
 
 
 License

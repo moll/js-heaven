@@ -1,11 +1,8 @@
-var HeavenError = require("./error")
 var indexBy = require("lodash.indexby")
 var zip = require("lodash.zip")
 var zipWith2 = require("lodash.zipwith")
 var isArray = Array.isArray
 var BAD_ATTRS = "Bad Attributes: "
-var NOT_FOUND = "Not Found"
-var MORE_FOUND = "More Than Expected"
 var UNIMPLEMENTED = "Unimplemented"
 module.exports = Heaven
 
@@ -24,9 +21,6 @@ Heaven.prototype.with = function(props) {
 }
 
 /**
- * Search is like `read`, but does not throw Not Found when the given id or an
- * array of ids return no models.
- *
  * Note that you cannot depend that the order of the returned models matches
  * the order in the query. That's because either databases may reorder their
  * response or because not all rows matched.
@@ -34,30 +28,44 @@ Heaven.prototype.with = function(props) {
 Heaven.prototype.search = function(query, opts) {
 	var self = this
 
-	return this._read(query, opts).then(function(attrs) {
-		if (attrs == null) return null
-		attrs = self.group(query, attrs)
-		attrs = isArray(attrs) ? attrs.map(self.parse, self) : self.parse(attrs)
+	return this._search(query, opts).then(function(attrs) {
+		if (attrs.length == 0) return attrs
+		attrs = self.group(query, attrs).map(self.parse, self)
 
 		switch (self.typeof(query)) {
 			case "model":
-				return self.assign(query, attrs)
+				return self.assignArray([query], attrs)
 
 			case "array":
 				if (query.length > 0 && query.every(isInstance.bind(null, self.model)))
 					return self.assignArray(query, attrs)
-		}
+				// Fall through.
 
-		return isArray(attrs) ? attrs.map(self.new, self) : self.new(attrs)
+			default: return attrs.map(self.new, self)
+		}
 	})
 }
 
-Heaven.prototype.read = function(query, opts) {
-	return this.search(query, opts).then(this.assert.bind(this, query))
+Heaven.prototype._search = function(_query, _opts) {
+	throw new Error(UNIMPLEMENTED)
 }
 
-Heaven.prototype._read = function(_query, _opts) {
-	throw new Error(UNIMPLEMENTED)
+Heaven.prototype.read = function(query, opts) {
+	var self = this
+
+	return this._read(query, opts).then(function(attrs) {
+		if (attrs == null) return null
+		attrs = self.parse(attrs)
+
+		switch (self.typeof(query)) {
+			case "model": return self.assign(query, attrs)
+			default: return self.new(attrs)
+		}
+	})
+}
+
+Heaven.prototype._read = function(query, opts) {
+	return this._search(query, opts).then(singleify)
 }
 
 Heaven.prototype.create = function(attrs, opts) {
@@ -118,41 +126,20 @@ Heaven.prototype._delete = function(_query, _opts) {
 }
 
 /**
- * Group is optionally grouping the result or result set from the database
- * before parsing.
+ * Group is optionally grouping the result set from the database before
+ * parsing.
  */
 Heaven.prototype.group = function(_query, attrs) {
 	return attrs
 }
 
 /**
- * Parses attributes returned from the database to a format the model
- * supports.	
+ * Parses attributes returned from the database to a format the model supports.	
  * Does not instantiate the model however! That's done by
  * `Heaven.prototype.new`.
  */
 Heaven.prototype.parse = function(attrs) {
 	return attrs
-}
-
-/**
- * Serializes a model or an object of attributes to the format the database
- * supports.	
- * Will be called both by `Heaven.prototype.create` to serialize models and
- * `Heaven.prototype.update` to serialize updated attributes.
- */
-Heaven.prototype.serialize = function(model) {
-	switch (this.typeof(model)) {
-		case "object":
-		case "model":
-			return typeof model.toJSON == "function" ? model.toJSON() : model
-
-		default: throw new TypeError(BAD_ATTRS + model)
-	}
-}
-
-Heaven.prototype.new = function(attrs) {
-	return new this.model(attrs)
 }
 
 Heaven.prototype.assign = function(model, attrs) {
@@ -168,6 +155,24 @@ Heaven.prototype.assignArray = function(models, attrs) {
 	}, this)
 }
 
+Heaven.prototype.new = function(attrs) {
+	return new this.model(attrs)
+}
+
+/**
+ * Serializes a model or an object of attributes to the format the database
+ * supports.	
+ * Will be called both by `Heaven.prototype.create` to serialize models and
+ * `Heaven.prototype.update` to serialize updated attributes.
+ */
+Heaven.prototype.serialize = function(obj) {
+	switch (this.typeof(obj)) {
+		case "object":
+		case "model": return typeof obj.toJSON == "function" ? obj.toJSON() : obj
+		default: throw new TypeError(BAD_ATTRS + obj)
+	}
+}
+
 /**
  * Returns a unique id for the given model or attributes.  
  * Will be called both by `Heaven.prototype.read` to get the id to query models
@@ -181,23 +186,6 @@ Heaven.prototype.identify = function(model) {
 Heaven.prototype.typeof = function(query) {
 	var kind = typeOf(query)
 	return kind == "object" && query instanceof this.model ? "model" : kind
-}
-
-Heaven.prototype.assert = function(query, models) {
-	switch (this.typeof(query)) {
-		case "number":
-		case "string":
-		case "model":
-			if (models == null) throw new HeavenError(404, NOT_FOUND)
-			return models
-
-		case "array":
-			if (models.length < query.length) throw new HeavenError(404, NOT_FOUND)
-			if (models.length > query.length) throw new HeavenError(508, MORE_FOUND)
-			return models
-
-		default: return models
-	}
 }
 
 function typeOf(obj) {
