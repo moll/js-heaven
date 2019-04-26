@@ -10,7 +10,7 @@
 		"url": "https://m811.com"
 	},
 
-	"main": "index.js",
+	"main": "heaven.js",
 	"scripts": {"test": "make test"},
 
 	"dependencies": {
