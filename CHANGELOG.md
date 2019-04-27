@@ -1,4 +1,4 @@
-## Unreleased
+## 0.11.0 (Apr 27, 2019)
 - Changes the semantics of `Heaven.prototype.search` and `Heaven.prototype.read` to always return an array and a single model respectively.  
   No response array length comparisons to query length or null checking done.
 - Removes `HeavenError` now that `Heaven.prototype.read` doesn't throw errors.
