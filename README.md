@@ -1,12 +1,14 @@
 Heaven.js
 =========
 [![NPM version][npm-badge]](https://www.npmjs.com/package/heaven)
+[![Build status][travis-badge]](https://travis-ci.org/moll/js-heaven)
 
 Heaven.js is a JavaScript library for abstracting databases or collections through a standard [CRUD][crud] API. It reduces the boilerplate of writing a generic [Table Data Gateway][gateway] object by, for example, instantiating models received from the database and serializing ones going in for you.
 
 Until Heaven.js reaches v1, its documentation is likely to be lacking. Sorry for that! It is, however, already used in production.
 
 [npm-badge]: https://img.shields.io/npm/v/heaven.svg
+[travis-badge]: https://travis-ci.org/moll/js-heaven.svg?branch=master
 [gateway]: https://www.martinfowler.com/eaaCatalog/tableDataGateway.html
 [crud]: https://en.wikipedia.org/wiki/Create,_read,_update_and_delete
 
