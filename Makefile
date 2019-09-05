@@ -27,7 +27,7 @@ publish:
 	npm publish
 
 clean:
-	rm *.tgz
+	rm -f *.tgz
 
 tag:
 	git tag "v$$($(NODE) -e 'console.log(require("./package").version)')"
