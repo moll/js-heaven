@@ -1,5 +1,5 @@
 ## 0.11.1 (Sep 6, 2019)
-- Calls Heaven.prototype.group even if no models were returned.  
+- Calls `Heaven.prototype.group` even if no models were returned.  
   This permits synthesizing models also when the response is empty.
 
 ## 0.11.0 (Apr 27, 2019)
