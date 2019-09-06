@@ -29,8 +29,9 @@ Heaven.prototype.search = function(query, opts) {
 	var self = this
 
 	return this._search(query, opts).then(function(attrs) {
+		attrs = self.group(query, attrs)
 		if (attrs.length == 0) return attrs
-		attrs = self.group(query, attrs).map(self.parse, self)
+		attrs = attrs.map(self.parse, self)
 
 		switch (self.typeof(query)) {
 			case "model":

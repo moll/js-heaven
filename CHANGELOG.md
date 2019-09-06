@@ -1,3 +1,7 @@
+## Unreleased
+- Calls Heaven.prototype.group even if no models were returned.  
+  This permits synthesizing models also when the response is empty.
+
 ## 0.11.0 (Apr 27, 2019)
 - Changes the semantics of `Heaven.prototype.search` and `Heaven.prototype.read` to always return an array and a single model respectively.  
   No response array length comparisons to query length or null checking done.

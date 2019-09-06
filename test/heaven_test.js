@@ -72,6 +72,18 @@ describe("Heaven", function() {
 	})
 
 	describe(".prototype.search", function() {
+		it("must call group even if response empty", function*() {
+			var heaven = new HeavenOnTest
+			heaven._search = promise([])
+
+			heaven.group = function(query, attrs) {
+				attrs.must.eql([])
+				return [{id: query, name: "John"}]
+			}
+
+			yield heaven.search(42).must.then.eql([new Model({id: 42, name: "John"})])
+		})
+
 		describe("given an id", function() {
 			it("must call _search", function() {
 				var heaven = spy(new HeavenOnTest)
