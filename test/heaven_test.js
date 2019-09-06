@@ -129,8 +129,10 @@ describe("Heaven", function() {
 				var model = new Model({name: "John"})
 				var heaven = spy(new HeavenOnTest)
 				heaven._search = promise([{name: "Raul"}])
-				yield heaven.search(model).must.then.eql([new Model({name: "Raul"})])
-				model.must.eql(new Model({name: "Raul"}))
+
+				var models = yield heaven.search(model)
+				models.must.eql([new Model({name: "Raul"})])
+				models[0].must.equal(model)
 			})
 
 			it("must resolve with empty array if none returned", function*() {
@@ -289,12 +291,11 @@ describe("Heaven", function() {
 				heaven._read.firstCall.args.must.eql([model, EXAMPLE_OPTS])
 			})
 
-			it("must resolve with the model and assign new attributes",
-				function*() {
+			it("must resolve with the model and assign new attributes", function*() {
 				var model = new Model({name: "John"})
 				var heaven = spy(new HeavenOnTest)
 				heaven._read = promise({name: "Raul"})
-				yield heaven.read(model).must.then.eql(new Model({name: "Raul"}))
+				yield heaven.read(model).must.then.equal(model)
 				model.must.eql(new Model({name: "Raul"}))
 			})
 
@@ -445,18 +446,15 @@ describe("Heaven", function() {
 				])
 			})
 
-			it("must resolve with model and assign new attributes given model",
+			it("must resolve with model and assign new attributes given a model",
 				function*() {
 				var heaven = spy(new HeavenOnTest)
 				heaven._create = promise([{id: 13}])
-				var a = new Model({name: "John"})
+				var model = new Model({name: "John"})
 
-				var updated = yield heaven.create([a])
-				updated.must.be.an.array()
-				updated.length.must.equal(1)
-				updated[0].must.equal(a)
-
-				a.must.eql(new Model({id: 13, name: "John"}))
+				var updated = yield heaven.create([model])
+				updated.must.eql([new Model({id: 13, name: "John"})])
+				updated[0].must.equal(model)
 			})
 
 			it("must resolve with models and assign new attributes given models",
