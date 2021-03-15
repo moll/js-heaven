@@ -1,3 +1,13 @@
+## Unreleased
+- No longer instantiates models from attributes given to `Heaven.prototype.create`.  
+  If you do need models for client-side default attributes, for example, instantiate them before calling `Heaven.prototype.create`:
+
+  ```javascript
+  var heaven = new Heaven(Model)
+
+  heaven.create(new Model({name: "John"}))
+  ```
+
 ## 0.11.1 (Sep 6, 2019)
 - Calls `Heaven.prototype.group` even if no models were returned.  
   This permits synthesizing models also when the response is empty.

@@ -70,6 +70,7 @@ Heaven.prototype._read = function(query, opts) {
 }
 
 Heaven.prototype.create = function(attrs, opts) {
+	var self = this
 	var single = !isArray(attrs)
 
 	switch (typeOf(attrs)) {
@@ -84,11 +85,16 @@ Heaven.prototype.create = function(attrs, opts) {
 		default: throw new TypeError(BAD_ATTRS + attrs)
 	}
 
-	var models = attrs.map(make.bind(null, this.model, this.new.bind(this)))
-	var created = this._create(models.map(this.serialize, this), opts)
-	created = created.then(map.bind(this, this.parse))
-	models = created.then(zipWith.bind(this, this.assign, models))
-	return single ? models.then(singleify) : models
+	var created = this._create(attrs.map(this.serialize, this), opts)
+
+	return created.then(function(created) {
+		created = created.map(self.parse, self)
+
+		if (attrs.every(isInstance.bind(null, self.model)))
+			created = zipWith2(attrs, created, self.assign, self)
+
+		return single ? singleify(created) : created
+	})
 }
 
 Heaven.prototype._create = function(_attrs, _opts) {
@@ -197,12 +203,6 @@ function typeOf(obj) {
 	return typeof obj
 }
 
-function make(klass, create, attrs) {
-	return attrs instanceof klass ? attrs : create(attrs)
-}
-
-function map(fn, array) { return array.map(fn, this) }
-function zipWith(fn, a, b) { return zipWith2(a, b, fn, this) }
 function isNully(value) { return value == null }
 function isInstance(model, value) { return value instanceof model }
 function singleify(array) { return array.length > 0 ? array[0] : null }

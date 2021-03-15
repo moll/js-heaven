@@ -323,7 +323,7 @@ describe("Heaven", function() {
 		})
 
 		describe("given attributes", function() {
-			it("must call _create with serialized model", function() {
+			it("must call _create with serialized attributes", function() {
 				var heaven = spy(new HeavenOnTest)
 				heaven.create({name: "John"}, EXAMPLE_OPTS)
 				heaven._create.callCount.must.equal(1)
@@ -338,11 +338,11 @@ describe("Heaven", function() {
 				heaven._create.firstCall.args.must.eql([[{a: 42, b: 69}], EXAMPLE_OPTS])
 			})
 
-			it("must resolve with a model and assign new attributes", function*() {
+			it("must resolve with parsed attributes", function*() {
 				var heaven = spy(new HeavenOnTest)
 				heaven._create = promise([{id: 13}])
 				var updated = yield heaven.create({name: "John"})
-				return updated.must.eql(new Model({id: 13, name: "John"}))
+				return updated.must.eql({id: 13})
 			})
 
 			// Heaven once did so. Keeping this for safety.
@@ -424,25 +424,6 @@ describe("Heaven", function() {
 				heaven._create.firstCall.args.must.eql([
 					[{name: "John"}, {name: "Mike"}],
 					EXAMPLE_OPTS
-				])
-			})
-
-			it("must resolve with model and assign new attributes given attributes",
-				function*() {
-				var heaven = spy(new HeavenOnTest)
-				heaven._create = promise([{id: 13}])
-				var updated = yield heaven.create([{name: "John"}])
-				updated.must.eql([new Model({id: 13, name: "John"})])
-			})
-
-			it("must resolve with models and assign new attributes given attributes",
-				function*() {
-				var heaven = spy(new HeavenOnTest)
-				heaven._create = promise([{id: 13}, {id: 42}])
-
-				yield heaven.create([{name: "John"}, {name: "Mike"}]).must.then.eql([
-					new Model({id: 13, name: "John"}),
-					new Model({id: 42, name: "Mike"}),
 				])
 			})
 
