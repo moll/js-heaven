@@ -8,6 +8,23 @@
   heaven.create(new Model({name: "John"}))
   ```
 
+- Heaven.js's tests use the `async` feature of JavaScript and therefore require Node v7.6 or newer. Heaven.js itself is fully ECMAScript 5 compatible and should run well in older browsers, provided a polyfill for `Map` is present.
+
+- Adds a separate `Heaven` class for synchronous use.
+
+  ```javascript
+  var HeavenSync = require("heaven/sync")
+  var HeavenAsync = require("heaven/async")
+  ```
+
+  All `HeavenSync` CRUD methods (`search`, `read`, `create`, `update` and `delete) perform the action immediately and return with the appropriate values. `HeavenAsync` methods on the other hand return promises as before.
+
+  The default export of Heaven.js remains the asynchronous version for backward compatbility.
+
+  ```javascript
+  require("heaven") == require("heaven/async")
+  ```
+
 ## 0.11.1 (Sep 6, 2019)
 - Calls `Heaven.prototype.group` even if no models were returned.  
   This permits synthesizing models also when the response is empty.
