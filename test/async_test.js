@@ -23,7 +23,7 @@ describe("HeavenAsync", function() {
 	describe(".prototype.create", function() {
 		it("must respond with a promise", function() {
 			var heaven = new Heaven
-			heaven._create = constant(resolve({id: 42}))
+			heaven._create = constant(resolve([{id: 42}]))
 			heaven.create({name: "John"}).then.must.be.a.function()
 		})
 	})
