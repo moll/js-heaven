@@ -1,4 +1,4 @@
-## Unreleased
+## 0.11.2 (Sep 17, 2021)
 - No longer instantiates models from attributes given to `Heaven.prototype.create`.  
   If you do need models for client-side default attributes, for example, instantiate them before calling `Heaven.prototype.create`:
 
