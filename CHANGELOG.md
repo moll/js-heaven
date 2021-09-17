@@ -17,7 +17,7 @@
   var HeavenAsync = require("heaven/async")
   ```
 
-  All `HeavenSync` CRUD methods (`search`, `read`, `create`, `update` and `delete) perform the action immediately and return with the appropriate values. `HeavenAsync` methods on the other hand return promises as before.
+  All `HeavenSync` CRUD methods (`search`, `read`, `create`, `update` and `delete`) perform the action immediately and return with the appropriate values. `HeavenAsync` methods on the other hand return promises as before.
 
   The default export of Heaven.js remains the asynchronous version for backward compatbility.
 
