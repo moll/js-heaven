@@ -1,4 +1,4 @@
-## 0.11.2 (Sep 17, 2021)
+## 0.12.0 (Sep 17, 2021)
 - No longer instantiates models from attributes given to `Heaven.prototype.create`.  
   If you do need models for client-side default attributes, for example, instantiate them before calling `Heaven.prototype.create`:
 
@@ -24,6 +24,11 @@
   ```javascript
   require("heaven") == require("heaven/async")
   ```
+## 0.11.3 (Sep 17, 2021)
+Republished v0.11.1 as v0.11.3 as unpublishing v0.11.2 from NPM was no longer possible.
+
+## 0.11.2 (Sep 17, 2021)
+Accidentally published v0.12 under v0.11.2.
 
 ## 0.11.1 (Sep 6, 2019)
 - Calls `Heaven.prototype.group` even if no models were returned.  
