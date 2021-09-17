@@ -1,3 +1,9 @@
+## 0.11.3 (Sep 17, 2021)
+Republished v0.11.1 as v0.11.3 as unpublishing v0.11.2 from NPM was no longer possible.
+
+## 0.11.2 (Sep 17, 2021)
+Accidentally published v0.12 under v0.11.2.
+
 ## 0.11.1 (Sep 6, 2019)
 - Calls Heaven.prototype.group even if no models were returned.  
   This permits synthesizing models also when the response is empty.
