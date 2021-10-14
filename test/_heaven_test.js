@@ -4,6 +4,7 @@ var demand = require("must")
 var compose = require("lodash.compose")
 var isPrototypeOf = Function.call.bind(Object.isPrototypeOf)
 var toUpperCase = Function.call.bind(String.prototype.toUpperCase)
+var toLowerCase = Function.call.bind(String.prototype.toLowerCase)
 var EXAMPLE_OPTS = {deleted: true}
 
 // Saving attributes to this.attributes catches double model initialization.
@@ -79,7 +80,7 @@ module.exports = function(Heaven, respond) {
 					heaven._search.firstCall.args.must.eql([42, EXAMPLE_OPTS])
 				})
 
-				it("must resolve with an array of models", async function() {
+				it("must return an array of models", async function() {
 					var heaven = new HeavenOnTest
 					heaven._search = constant(respond([{name: "John"}, {name: "Mike"}]))
 
@@ -89,7 +90,7 @@ module.exports = function(Heaven, respond) {
 					])
 				})
 
-				it("must resolve with empty array if none returned", async function() {
+				it("must return empty array if none returned", async function() {
 					var heaven = new HeavenOnTest
 					heaven._search = constant(respond([]))
 					demand(await heaven.search(42)).eql([])
@@ -114,7 +115,7 @@ module.exports = function(Heaven, respond) {
 					heaven._search.firstCall.args.must.eql([model, EXAMPLE_OPTS])
 				})
 
-				it("must resolve with the model and assign new attributes",
+				it("must return the model and assign new attributes",
 					async function() {
 					var model = new Model({name: "John"})
 					var heaven = new HeavenOnTest
@@ -125,7 +126,7 @@ module.exports = function(Heaven, respond) {
 					models[0].must.equal(model)
 				})
 
-				it("must resolve with empty array if none returned", async function() {
+				it("must return empty array if none returned", async function() {
 					var model = new Model({name: "John"})
 					var heaven = new HeavenOnTest
 					heaven._search = constant(respond([]))
@@ -134,8 +135,8 @@ module.exports = function(Heaven, respond) {
 				})
 			})
 
-			describe("given an array", function() {
-				it("must call _search given ids", function() {
+			describe("given an array of ids", function() {
+				it("must call _search", function() {
 					var heaven = new HeavenOnTest
 					heaven._search = Sinon.spy(constant(respond([])))
 
@@ -143,7 +144,14 @@ module.exports = function(Heaven, respond) {
 					heaven._search.firstCall.args.must.eql([[42, 69], EXAMPLE_OPTS])
 				})
 
-				it("must resolve with an array of models given ids", async function() {
+				it("must return empty array given an empty array",
+					async function() {
+					var heaven = new HeavenOnTest
+					heaven._search = constant(respond([]))
+					demand(await heaven.search([])).must.eql([])
+				})
+
+				it("must return an array of models", async function() {
 					var heaven = new HeavenOnTest
 					heaven._search = constant(respond([{name: "John"}, {name: "Mike"}]))
 
@@ -154,28 +162,23 @@ module.exports = function(Heaven, respond) {
 				})
 
 				// Protects against naive boolean checks.
-				it("must parse 0 to model given ids", async function() {
+				it("must parse 0 to model", async function() {
 					/* eslint no-new-wrappers: 0 */
 					var heaven = new HeavenOnTest().with({model: Number})
 					heaven._search = constant(respond([0]))
 					demand(await heaven.search(["Zero"])).eql([new Number(0)])
 				})
 
-				it("must resolve with empty array given an empty array",
-					async function() {
-					var heaven = new HeavenOnTest
-					heaven._search = constant(respond([]))
-					demand(await heaven.search([])).must.eql([])
-				})
-
-				it("must resolve with models if empty array returned given ids",
+				it("must return models if empty array returned",
 					async function() {
 					var heaven = new HeavenOnTest
 					heaven._search = constant(respond([]))
 					demand(await heaven.search([42, 69])).eql([])
 				})
+			})
 
-				it("must call _search given models", function() {
+			describe("given an array of models", function() {
+				it("must call _search", function() {
 					var heaven = new HeavenOnTest
 					heaven._search = Sinon.spy(constant(respond([])))
 
@@ -185,7 +188,7 @@ module.exports = function(Heaven, respond) {
 					heaven._search.firstCall.args.must.eql([[a, b], EXAMPLE_OPTS])
 				})
 
-				it("must resolve with models given models", async function() {
+				it("must return models", async function() {
 					var a = new Model({id: 13, name: "John"})
 					var b = new Model({id: 42, name: "Mike"})
 
@@ -205,7 +208,7 @@ module.exports = function(Heaven, respond) {
 					b.must.eql(new Model({id: 42, name: "Raul"}))
 				})
 
-				it("must resolve with models by ids given models", async function() {
+				it("must return models by ids", async function() {
 					var a = new Model({id: 13, name: "John"})
 					var b = new Model({id: 42, name: "Mike"})
 
@@ -225,8 +228,7 @@ module.exports = function(Heaven, respond) {
 					b.must.eql(new Model({id: 42, name: "Raul"}))
 				})
 
-				it("must resolve with models if less returned given models",
-					async function() {
+				it("must return models if less returned", async function() {
 					var heaven = new HeavenOnTest
 					heaven._search = constant(respond([{id: 42, name: "Jane"}]))
 
@@ -253,19 +255,19 @@ module.exports = function(Heaven, respond) {
 					heaven._read.firstCall.args.must.eql([42, EXAMPLE_OPTS])
 				})
 
-				it("must resolve with a model", async function() {
+				it("must return a model", async function() {
 					var heaven = new HeavenOnTest
 					heaven._read = constant(respond({name: "John"}))
 					demand(await heaven.read(42)).eql(new Model({name: "John"}))
 				})
 
-				it("must resolve with null if undefined returned", async function() {
+				it("must return null if undefined returned", async function() {
 					var heaven = new HeavenOnTest
 					heaven._read = constant(respond(undefined))
 					demand(await heaven.read(42)).equal(null)
 				})
 
-				it("must resolve with null if null returned", async function() {
+				it("must return null if null returned", async function() {
 					var heaven = new HeavenOnTest
 					heaven._read = constant(respond(null))
 					demand(await heaven.read(42)).equal(null)
@@ -290,7 +292,7 @@ module.exports = function(Heaven, respond) {
 					heaven._read.firstCall.args.must.eql([model, EXAMPLE_OPTS])
 				})
 
-				it("must resolve with the model and assign new attributes",
+				it("must return the model and assign new attributes",
 					async function() {
 					var model = new Model({name: "John"})
 					var heaven = new HeavenOnTest
@@ -299,7 +301,7 @@ module.exports = function(Heaven, respond) {
 					model.must.eql(new Model({name: "Raul"}))
 				})
 
-				it("must resolve with null if none returned", async function() {
+				it("must return null if none returned", async function() {
 					var model = new Model({name: "John"})
 					var heaven = new HeavenOnTest
 					heaven._read = constant(respond(null))
@@ -323,15 +325,15 @@ module.exports = function(Heaven, respond) {
 			})
 
 			describe("given attributes", function() {
-				// TODO: Add test for serialization with upcasing keys.
 				it("must call _create with serialized attributes", function() {
 					var heaven = new HeavenOnTest
 					heaven._create = Sinon.spy(constant(respond([])))
+					heaven.serialize = compose(upcaseKeys, heaven.serialize)
 					heaven.create({name: "John"}, EXAMPLE_OPTS)
 					heaven._create.callCount.must.equal(1)
 
 					heaven._create.firstCall.args.must.eql([
-						[{name: "John"}],
+						[{NAME: "John"}],
 						EXAMPLE_OPTS]
 					)
 				})
@@ -350,11 +352,12 @@ module.exports = function(Heaven, respond) {
 					])
 				})
 
-				it("must resolve with parsed attributes", async function() {
+				it("must return parsed attributes", async function() {
 					var heaven = new HeavenOnTest
-					heaven._create = constant(respond([{id: 13}]))
-					var updated = await heaven.create({name: "John"})
-					return updated.must.eql({id: 13})
+					heaven._create = constant(respond([{ID: 13}]))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
+					var created = await heaven.create({name: "John"})
+					return created.must.eql({id: 13})
 				})
 
 				// Heaven once did so. Keeping this for safety.
@@ -370,19 +373,21 @@ module.exports = function(Heaven, respond) {
 				it("must call _create with serialized model", function() {
 					var heaven = new HeavenOnTest
 					heaven._create = Sinon.spy(constant(respond([])))
+					heaven.serialize = compose(upcaseKeys, heaven.serialize)
 					heaven.create(new Model({name: "John"}), EXAMPLE_OPTS)
 					heaven._create.callCount.must.equal(1)
 
 					heaven._create.firstCall.args.must.eql([
-						[{name: "John"}],
+						[{NAME: "John"}],
 						EXAMPLE_OPTS
 					])
 				})
 
-				it("must resolve with the model and assign new attributes",
+				it("must return the model and assign parsed attributes",
 					async function() {
 					var heaven = new HeavenOnTest
-					heaven._create = constant(respond([{id: 13}]))
+					heaven._create = constant(respond([{ID: 13}]))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
 					var model = new Model({name: "John"})
 					demand(await heaven.create(model)).equal(model)
 					model.must.eql(new Model({id: 13, name: "John"}))
@@ -403,7 +408,7 @@ module.exports = function(Heaven, respond) {
 				})
 			})
 
-			describe("given an array", function() {
+			describe("given an array of attributes", function() {
 				it("must throw TypeError given undefined", function() {
 					var err
 					try { new HeavenOnTest().create([undefined]) } catch (ex) { err = ex }
@@ -436,43 +441,73 @@ module.exports = function(Heaven, respond) {
 					heaven._create.firstCall.args.must.eql([[], EXAMPLE_OPTS])
 				})
 
-				it("must call _create with serialized models given attributes",
-					function() {
+				it("must call _create with serialized attributes", function() {
 					var heaven = new HeavenOnTest
 					heaven._create = Sinon.spy(constant(respond([])))
+					heaven.serialize = compose(upcaseKeys, heaven.serialize)
 
 					heaven.create([{name: "John"}, {name: "Mike"}], EXAMPLE_OPTS)
 					heaven._create.callCount.must.equal(1)
 
 					heaven._create.firstCall.args.must.eql([
-						[{name: "John"}, {name: "Mike"}],
+						[{NAME: "John"}, {NAME: "Mike"}],
 						EXAMPLE_OPTS
 					])
 				})
 
-				it("must resolve with model and assign new attributes given a model",
-					async function() {
+				it("must return parsed attributes", async function() {
 					var heaven = new HeavenOnTest
-					heaven._create = constant(respond([{id: 13}]))
+					heaven._create = constant(respond([{ID: 13}, {ID: 42}]))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
+					var created = await heaven.create([{name: "John"}, {name: "Mike"}])
+					created.must.eql([{id: 13}, {id: 42}])
+				})
+			})
 
-					var model = new Model({name: "John"})
-					var updated = await heaven.create([model])
-					updated.must.eql([new Model({id: 13, name: "John"})])
-					updated[0].must.equal(model)
+			describe("given an array of models", function() {
+				it("must call _create with serialized attributes", function() {
+					var heaven = new HeavenOnTest
+					heaven._create = Sinon.spy(constant(respond([])))
+					heaven.serialize = compose(upcaseKeys, heaven.serialize)
+
+					heaven.create([
+						new Model({name: "John"}),
+						new Model({name: "Mike"})
+					], EXAMPLE_OPTS)
+
+					heaven._create.callCount.must.equal(1)
+
+					heaven._create.firstCall.args.must.eql([
+						[{NAME: "John"}, {NAME: "Mike"}],
+						EXAMPLE_OPTS
+					])
 				})
 
-				it("must resolve with models and assign new attributes given models",
+				it("must return model and assign parsed attributes",
 					async function() {
 					var heaven = new HeavenOnTest
-					heaven._create = constant(respond([{id: 13}, {id: 42}]))
+					heaven._create = constant(respond([{ID: 13}]))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
+
+					var model = new Model({name: "John"})
+					var created = await heaven.create([model])
+					created.must.eql([new Model({id: 13, name: "John"})])
+					created[0].must.equal(model)
+				})
+
+				it("must return models and assign parsed attributes",
+					async function() {
+					var heaven = new HeavenOnTest
+					heaven._create = constant(respond([{ID: 13}, {ID: 42}]))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
 
 					var a = new Model({name: "John"})
 					var b = new Model({name: "Mike"})
-					var updated = await heaven.create([a, b])
-					updated.must.be.an.array()
-					updated.length.must.equal(2)
-					updated[0].must.equal(a)
-					updated[1].must.equal(b)
+					var created = await heaven.create([a, b])
+					created.must.be.an.array()
+					created.length.must.equal(2)
+					created[0].must.equal(a)
+					created[1].must.equal(b)
 
 					a.must.eql(new Model({id: 13, name: "John"}))
 					b.must.eql(new Model({id: 42, name: "Mike"}))
@@ -494,13 +529,14 @@ module.exports = function(Heaven, respond) {
 			})
 
 			describe("given an id and attributes", function() {
-				it("must throw TypeError given undefined", function() {
+				it("must throw TypeError given undefined attributes", function() {
 					var err
-					try { new HeavenOnTest().update(42, undefined) } catch (ex) { err = ex }
+					try { new HeavenOnTest().update(42, undefined) }
+					catch (ex) { err = ex }
 					err.must.be.an.error(TypeError, /bad attributes/i)
 				})
 
-				it("must throw TypeError given null", function() {
+				it("must throw TypeError given null attributes", function() {
 					var err
 					try { new HeavenOnTest().update(42, null) } catch (ex) { err = ex }
 					err.must.be.an.error(TypeError, /bad attributes/i)
@@ -517,10 +553,11 @@ module.exports = function(Heaven, respond) {
 					])
 				})
 
-				it("must resolve with updates", async function() {
+				it("must return unparsed updates", async function() {
 					var heaven = new HeavenOnTest
-					heaven._update = constant(respond({id: 13}))
-					demand(await heaven.update(42, {name: "John"})).eql({id: 13})
+					heaven._update = constant(respond({ID: 13}))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
+					demand(await heaven.update(42, {name: "John"})).eql({ID: 13})
 				})
 
 				// Support this no-op.
@@ -529,6 +566,12 @@ module.exports = function(Heaven, respond) {
 					heaven._update = Sinon.spy(constant(respond(undefined)))
 					heaven.update(42, {}, EXAMPLE_OPTS)
 					heaven._update.firstCall.args.must.eql([42, {}, EXAMPLE_OPTS])
+				})
+
+				it("must return null if null returned", async function() {
+					var heaven = new HeavenOnTest
+					heaven._update = constant(respond(null))
+					demand(await heaven.update(42, {name: "Mike"})).equal(null)
 				})
 			})
 
@@ -543,6 +586,14 @@ module.exports = function(Heaven, respond) {
 					heaven._update.firstCall.args.must.eql([
 						model, {NAME: "John"}, EXAMPLE_OPTS
 					])
+				})
+
+				it("must return unparsed updates", async function() {
+					var heaven = new HeavenOnTest
+					heaven._update = constant(respond({ID: 13}))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
+					var model = new Model({name: "John"})
+					demand(await heaven.update(model)).eql({ID: 13})
 				})
 			})
 
@@ -560,15 +611,16 @@ module.exports = function(Heaven, respond) {
 					])
 				})
 
-				it("must resolve with updates", async function() {
+				it("must return unparsed updates", async function() {
 					var heaven = new HeavenOnTest
-					heaven._update = constant(respond({id: 13}))
+					heaven._update = constant(respond({ID: 13}))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
 					var model = new Model({name: "John"})
-					demand(await heaven.update(model, {name: "Mike"})).eql({id: 13})
+					demand(await heaven.update(model, {name: "Mike"})).eql({ID: 13})
 					model.must.eql(new Model({name: "John"}))
 				})
 
-				it("must resolve with null if null returned", async function() {
+				it("must return null if null returned", async function() {
 					var heaven = new HeavenOnTest
 					heaven._update = constant(respond(null))
 					var model = new Model({name: "John"})
@@ -577,7 +629,7 @@ module.exports = function(Heaven, respond) {
 				})
 			})
 
-			describe("given an array", function() {
+			describe("given an array of models", function() {
 				it("must call _update with serialized attributes", function() {
 					var heaven = new HeavenOnTest
 					heaven._update = Sinon.spy(constant(respond([{id: 13}, {id: 42}])))
@@ -588,28 +640,26 @@ module.exports = function(Heaven, respond) {
 					heaven.update([a, b], undefined, EXAMPLE_OPTS)
 
 					heaven._update.firstCall.args.must.eql([
-						new Map, undefined, EXAMPLE_OPTS
-					])
-
-					Array.from(heaven._update.firstCall.args[0]).must.eql([
-						[a, {NAME: "John"}],
-						[b, {NAME: "Mike"}]
+						new Map([[a, {NAME: "John"}], [b, {NAME: "Mike"}]]),
+						undefined,
+						EXAMPLE_OPTS
 					])
 				})
 
-				it("must resolve with updates given models", async function() {
+				it("must return unparsed updates given models", async function() {
 					var heaven = new HeavenOnTest
-					heaven._update = constant(respond([{id: 13}, {id: 42}]))
+					heaven._update = constant(respond([{ID: 13}, {ID: 42}]))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
 
 					var a = new Model({name: "John"})
 					var b = new Model({name: "Mike"})
-					demand(await heaven.update([a, b])).eql([{id: 13}, {id: 42}])
+					demand(await heaven.update([a, b])).eql([{ID: 13}, {ID: 42}])
 					a.must.eql(new Model({name: "John"}))
 					b.must.eql(new Model({name: "Mike"}))
 				})
 			})
 
-			describe("given an array and attributes", function() {
+			describe("given an array of ids and attributes", function() {
 				it("must throw TypeError given an array of attributes", function() {
 					var err
 					try { new HeavenOnTest().update([42], [{name: "John"}]) }
@@ -617,8 +667,7 @@ module.exports = function(Heaven, respond) {
 					err.must.be.an.error(TypeError, /bad attributes/i)
 				})
 
-				it("must call _update with serialized attributes given ids",
-					function() {
+				it("must call _update with serialized attributes", function() {
 					var heaven = new HeavenOnTest
 					heaven._update = Sinon.spy(constant(respond(undefined)))
 					heaven.serialize = compose(upcaseKeys, heaven.serialize)
@@ -629,15 +678,17 @@ module.exports = function(Heaven, respond) {
 					])
 				})
 
-				it("must resolve with updates given ids", async function() {
+				it("must return unparsed updates", async function() {
 					var heaven = new HeavenOnTest
-					heaven._update = constant(respond([{id: 13}, {id: 42}]))
+					heaven._update = constant(respond([{ID: 13}, {ID: 42}]))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
 					var updates = await heaven.update([13, 42], {name: "John"})
-					updates.must.eql([{id: 13}, {id: 42}])
+					updates.must.eql([{ID: 13}, {ID: 42}])
 				})
+			})
 
-				it("must call _update with serialized attributes given models",
-					function() {
+			describe("given an array of models and attributes", function() {
+				it("must call _update with serialized attributes", function() {
 					var heaven = new HeavenOnTest
 					heaven._update = Sinon.spy(constant(respond(undefined)))
 					heaven.serialize = compose(upcaseKeys, heaven.serialize)
@@ -650,14 +701,15 @@ module.exports = function(Heaven, respond) {
 					])
 				})
 
-				it("must resolve with updates given models", async function() {
+				it("must return unparsed updates", async function() {
 					var heaven = new HeavenOnTest
-					heaven._update = constant(respond([{id: 13}, {id: 42}]))
+					heaven._update = constant(respond([{ID: 13}, {ID: 42}]))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
+
 					var a = new Model({name: "John"})
 					var b = new Model({name: "Mike"})
-
 					var updates = await heaven.update([a, b], {name: "Raul"})
-					updates.must.eql([{id: 13}, {id: 42}])
+					updates.must.eql([{ID: 13}, {ID: 42}])
 					a.must.eql(new Model({name: "John"}))
 					b.must.eql(new Model({name: "Mike"}))
 				})
@@ -673,14 +725,14 @@ module.exports = function(Heaven, respond) {
 					heaven._delete.firstCall.args.must.eql([42, EXAMPLE_OPTS])
 				})
 
-				it("must resolve with deletes", async function() {
+				it("must return deletes", async function() {
 					var heaven = new HeavenOnTest
 					heaven._delete = constant(respond({id: 13}))
 					demand(await heaven.delete(42)).eql({id: 13})
 				})
 			})
 
-			describe("given an array", function() {
+			describe("given an array of ids", function() {
 				it("must call _delete given ids", function() {
 					var heaven = new HeavenOnTest
 					heaven._delete = Sinon.spy(constant(respond(undefined)))
@@ -688,7 +740,7 @@ module.exports = function(Heaven, respond) {
 					heaven._delete.firstCall.args.must.eql([[13, 42], EXAMPLE_OPTS])
 				})
 
-				it("must resolve with deletes given ids", async function() {
+				it("must return deletes given ids", async function() {
 					var heaven = new HeavenOnTest
 					heaven._delete = constant(respond([{id: 13}, {id: 42}]))
 					demand(await heaven.delete([13, 42])).eql([{id: 13}, {id: 42}])
@@ -744,3 +796,4 @@ module.exports = function(Heaven, respond) {
 
 function constant(value) { return function() { return value } }
 function upcaseKeys(obj) { return O.mapKeys(obj, toUpperCase) }
+function downcaseKeys(obj) { return O.mapKeys(obj, toLowerCase) }
