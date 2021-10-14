@@ -553,6 +553,18 @@ module.exports = function(Heaven, respond) {
 					])
 				})
 
+				it("must call _update with serialized attributes given model",
+					function() {
+					var heaven = new HeavenOnTest
+					heaven._update = Sinon.spy(constant(respond(undefined)))
+					heaven.serialize = compose(upcaseKeys, heaven.serialize)
+					heaven.update(42, new Model({name: "John"}), EXAMPLE_OPTS)
+
+					heaven._update.firstCall.args.must.eql([
+						42, {NAME: "John"}, EXAMPLE_OPTS
+					])
+				})
+
 				it("must return unparsed updates", async function() {
 					var heaven = new HeavenOnTest
 					heaven._update = constant(respond({ID: 13}))
@@ -605,6 +617,20 @@ module.exports = function(Heaven, respond) {
 
 					var model = new Model({name: "John"})
 					heaven.update(model, {name: "Mike"}, EXAMPLE_OPTS)
+
+					heaven._update.firstCall.args.must.eql([
+						model, {NAME: "Mike"}, EXAMPLE_OPTS
+					])
+				})
+
+				it("must call _update with serialized attributes given model",
+					function() {
+					var heaven = new HeavenOnTest
+					heaven._update = Sinon.spy(constant(respond(undefined)))
+					heaven.serialize = compose(upcaseKeys, heaven.serialize)
+
+					var model = new Model({name: "John"})
+					heaven.update(model, new Model({name: "Mike"}), EXAMPLE_OPTS)
 
 					heaven._update.firstCall.args.must.eql([
 						model, {NAME: "Mike"}, EXAMPLE_OPTS
@@ -710,6 +736,75 @@ module.exports = function(Heaven, respond) {
 					var b = new Model({name: "Mike"})
 					var updates = await heaven.update([a, b], {name: "Raul"})
 					updates.must.eql([{ID: 13}, {ID: 42}])
+					a.must.eql(new Model({name: "John"}))
+					b.must.eql(new Model({name: "Mike"}))
+				})
+			})
+
+			describe("given a map of ids and attributes", function() {
+				it("must call _update with serialized attributes", function() {
+					var heaven = new HeavenOnTest
+					heaven._update = Sinon.spy(constant(respond([{id: 13}, {id: 42}])))
+					heaven.serialize = compose(upcaseKeys, heaven.serialize)
+
+					heaven.update(new Map([
+						[13, {name: "Jane"}],
+						[37, {name: "Raul"}]
+					]), undefined, EXAMPLE_OPTS)
+
+					heaven._update.firstCall.args.must.eql([
+						new Map([[13, {NAME: "Jane"}], [37, {NAME: "Raul"}]]),
+						undefined,
+						EXAMPLE_OPTS
+					])
+				})
+
+				it("must return unparsed updates", async function() {
+					var heaven = new HeavenOnTest
+					heaven._update = constant(respond([{ID: 13}, {ID: 42}]))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
+
+					demand(await heaven.update(new Map([
+						[13, {name: "Jane"}],
+						[37, {name: "Raul"}]
+					]))).eql([{ID: 13}, {ID: 42}])
+				})
+			})
+
+			describe("given a map of models and attributes", function() {
+				it("must call _update with serialized attributes", function() {
+					var heaven = new HeavenOnTest
+					heaven._update = Sinon.spy(constant(respond([{id: 13}, {id: 42}])))
+					heaven.serialize = compose(upcaseKeys, heaven.serialize)
+
+					var a = new Model({name: "John"})
+					var b = new Model({name: "Mike"})
+
+					heaven.update(new Map([
+						[a, {name: "Jane"}],
+						[b, {name: "Raul"}]
+					]), undefined, EXAMPLE_OPTS)
+
+					heaven._update.firstCall.args.must.eql([
+						new Map([[a, {NAME: "Jane"}], [b, {NAME: "Raul"}]]),
+						undefined,
+						EXAMPLE_OPTS
+					])
+				})
+
+				it("must return unparsed updates", async function() {
+					var heaven = new HeavenOnTest
+					heaven._update = constant(respond([{ID: 13}, {ID: 42}]))
+					heaven.parse = compose(downcaseKeys, heaven.parse)
+
+					var a = new Model({name: "John"})
+					var b = new Model({name: "Mike"})
+
+					demand(await heaven.update(new Map([
+						[a, {name: "Jane"}],
+						[b, {name: "Raul"}]
+					]))).eql([{ID: 13}, {ID: 42}])
+
 					a.must.eql(new Model({name: "John"}))
 					b.must.eql(new Model({name: "Mike"}))
 				})

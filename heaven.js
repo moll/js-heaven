@@ -29,18 +29,29 @@ Heaven.prototype._create = function(_attrs, _opts) {
 }
 
 Heaven.prototype.update = function(query, attrs, opts) {
-	var type = this.typeof(query)
-	if (type === "model" && attrs === undefined) attrs = query
+	switch (this.typeof(query)) {
+		case "model": if (attrs === undefined) attrs = query; break
 
-	switch (typeOf(attrs)) {
-		case "undefined":
-			if (type === "array" && query.every(isInstance.bind(null, this.model)))
+		case "array":
+			if (attrs === undefined && query.every(isInstance.bind(null, this.model)))
 				query = new Map(zip(query, query.map(this.serialize, this)))
-			else if (type !== "map")
-				throw new TypeError(BAD_ATTRS + "undefined")
 			break
 
+		case "map":
+			var unserialized = query
+			query = new Map
+
+			unserialized.forEach(function(attrs, id) {
+				query.set(id, this.serialize(attrs))
+			}, this)
+
+			break
+	}
+
+	switch (this.typeof(attrs)) {
+		case "model":
 		case "object": attrs = this.serialize(attrs); break
+		case "undefined": if (query instanceof Map) break; // Fall through.
 		default: throw new TypeError(BAD_ATTRS + attrs)
 	}
 
