@@ -1,6 +1,8 @@
 var indexBy = require("lodash.indexby")
+var zip = require("lodash.zip")
 var isArray = Array.isArray
 var BAD_ATTRS = "Bad Attributes: "
+var UNIMPLEMENTED = "Unimplemented"
 exports = module.exports = Heaven
 exports.typeOf = typeOf
 
@@ -16,6 +18,45 @@ Heaven.prototype.with = function(props) {
 	if ("model" in props) heaven.model = props.model
 	if ("idAttribute" in props) heaven.idAttribute = props.idAttribute
 	return heaven
+}
+
+Heaven.prototype._search = function(_query, _opts) {
+	throw new Error(UNIMPLEMENTED)
+}
+
+Heaven.prototype._create = function(_attrs, _opts) {
+	throw new Error(UNIMPLEMENTED)
+}
+
+Heaven.prototype.update = function(query, attrs, opts) {
+	var type = this.typeof(query)
+	if (type === "model" && attrs === undefined) attrs = query
+
+	switch (typeOf(attrs)) {
+		case "undefined":
+			if (type === "array" && query.every(isInstance.bind(null, this.model)))
+				query = new Map(zip(query, query.map(this.serialize, this)))
+			else if (type !== "map")
+				throw new TypeError(BAD_ATTRS + "undefined")
+			break
+
+		case "object": attrs = this.serialize(attrs); break
+		default: throw new TypeError(BAD_ATTRS + attrs)
+	}
+
+	return this._update(query, attrs, opts)
+}
+
+Heaven.prototype._update = function(_query, _attrs, _opts) {
+	throw new Error(UNIMPLEMENTED)
+}
+
+Heaven.prototype.delete = function(query, opts) {
+	return this._delete(query, opts)
+}
+
+Heaven.prototype._delete = function(_query, _opts) {
+	throw new Error(UNIMPLEMENTED)
 }
 
 /**
@@ -88,3 +129,5 @@ function typeOf(obj) {
 	if (obj instanceof Map) return "map"
 	return typeof obj
 }
+
+function isInstance(model, value) { return value instanceof model }
