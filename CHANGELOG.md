@@ -1,4 +1,4 @@
-## Unreleased
+## 0.12.1 (Oct 15, 2021)
 - Fixes missing serialization of `Map`s given to `Heaven.prototype.update`.
 
 ## 0.12.0 (Sep 17, 2021)
